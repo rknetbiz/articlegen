@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Article Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .form-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 700px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+        
+        .form-group {
+            margin-bottom: 30px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            font-size: 1.1rem;
+        }
+        
+        .required {
+            color: #e74c3c;
+            margin-left: 2px;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        textarea {
+            height: 120px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 18px 40px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+        
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 2px dashed #667eea;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            color: #666;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        
+        .loading-steps {
+            color: #888;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .feature-list {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 30px 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        .feature-list h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .feature-list ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-list li {
+            color: #666;
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <div class="header">
+            <h1>🤖 AI Article Generator</h1>
+            <p class="subtitle">Generate high-quality, human-like articles with AI detection and automatic publishing to Notion</p>
+        </div>
+        
+        <div class="feature-list">
+            <h3>✨ What you'll get:</h3>
+            <ul>
+                <li>Professional article written by GPT-4</li>
+                <li>AI detection scoring and automatic rewriting</li>
+                <li>Human-like content that passes AI detectors</li>
+                <li>Automatic saving to your Notion database</li>
+                <li>Word count and performance metrics</li>
+            </ul>
+        </div>
+        
+        <form id="articleForm" action="https://lonely-persons-benz-responsibilities.trycloudflare.com/webhook/article-generator" method="POST">
+            <div class="form-group">
+                <label for="prompt">
+                    Article Prompt <span class="required">*</span>
+                </label>
+                <textarea 
+                    name="prompt" 
+                    id="prompt" 
+                    required 
+                    placeholder="Enter your detailed article prompt. For example: 'Act as a copywriter for a health company. Write persuasive content about custom vegan diet plans that help people lose weight naturally. Include benefits, scientific backing, and a call-to-action for a free consultation.'"
+                ></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="wordCount">
+                    Target Word Count <span class="required">*</span>
+                </label>
+                <input 
+                    type="number" 
+                    name="wordCount" 
+                    id="wordCount" 
+                    required 
+                    placeholder="1000" 
+                    min="100" 
+                    max="5000"
+                    value="1000"
+                >
+            </div>
+            
+            <div class="form-group">
+                <label for="tone">
+                    Writing Tone & Style
+                </label>
+                <input 
+                    type="text" 
+                    name="tone" 
+                    id="tone" 
+                    placeholder="professional, casual, technical, persuasive, friendly (optional - defaults to professional)"
+                >
+            </div>
+            
+            <button type="submit" class="submit-btn" id="submitBtn">
+                Generate Article ✨
+            </button>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <div class="loading-text">Generating your article...</div>
+                <div class="loading-steps">
+                    This process includes:<br>
+                    • Writing the initial article<br>
+                    • Checking AI detection score<br>
+                    • Rewriting for human-like content<br>
+                    • Saving to Notion database
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <script>
+        document.getElementById('articleForm').addEventListener('submit', function(e) {
+            // Show loading state
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('loading').classList.add('show');
+            
+            // Optional: Add form validation
+            const prompt = document.getElementById('prompt').value.trim();
+            const wordCount = document.getElementById('wordCount').value;
+            
+            if (!prompt || prompt.length < 20) {
+                e.preventDefault();
+                alert('Please enter a detailed prompt (at least 20 characters)');
+                document.getElementById('submitBtn').style.display = 'block';
+                document.getElementById('loading').classList.remove('show');
+                return;
+            }
+            
+            if (!wordCount || wordCount < 100 || wordCount > 5000) {
+                e.preventDefault();
+                alert('Please enter a word count between 100 and 5000');
+                document.getElementById('submitBtn').style.display = 'block';
+                document.getElementById('loading').classList.remove('show');
+                return;
+            }
+        });
+        
+        // Auto-resize textarea
+        document.getElementById('prompt').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+        });
+    </script>
+</body>
+</html>
