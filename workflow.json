@@ -1,0 +1,859 @@
+{
+  "name": "articlegen",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "article-generator",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "7789604c-e5e1-4804-a827-eca9d19f382a",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1648,
+        192
+      ],
+      "webhookId": "428bae04-2a86-48aa-a5f6-15215d40f035"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition1",
+              "leftValue": "={{ $json.body.prompt }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "98fa16a5-d371-4966-b815-89493a384544",
+      "name": "Check Form Data",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1472,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "<!DOCTYPE html>\n<html>\n<head>\n    <title>AI Article Generator</title>\n    <style>\n        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 700px; margin: 50px auto; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }\n        .form-container { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }\n        h1 { color: #333; text-align: center; margin-bottom: 10px; font-size: 2.5em; }\n        .subtitle { color: #666; text-align: center; margin-bottom: 30px; font-size: 1.1em; }\n        .form-group { margin-bottom: 25px; }\n        label { display: block; margin-bottom: 8px; font-weight: 600; color: #555; font-size: 1.1em; }\n        input, textarea { width: 100%; padding: 15px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px; transition: border-color 0.3s; box-sizing: border-box; }\n        input:focus, textarea:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }\n        textarea { height: 120px; resize: vertical; font-family: inherit; }\n        button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; font-weight: 600; width: 100%; transition: transform 0.2s; }\n        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }\n        button:active { transform: translateY(0); }\n        .required { color: #e74c3c; }\n        .loading { display: none; text-align: center; margin-top: 20px; }\n        .spinner { border: 3px solid #f3f3f3; border-top: 3px solid #667eea; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto; }\n        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }\n    </style>\n</head>\n<body>\n    <div class=\"form-container\">\n        <h1>🤖 AI Article Generator</h1>\n        <p class=\"subtitle\">Generate high-quality articles with AI detection and automatic publishing</p>\n        <form id=\"articleForm\" method=\"POST\">\n            <div class=\"form-group\">\n                <label for=\"prompt\">Article Prompt <span class=\"required\">*</span></label>\n                <textarea name=\"prompt\" id=\"prompt\" required placeholder=\"Enter your detailed article prompt. For example: 'Act as a copywriter for a health company. Write persuasive content about custom vegan diet plans that help people lose weight naturally...'\"></textarea>\n            </div>\n            <div class=\"form-group\">\n                <label for=\"wordCount\">Target Word Count <span class=\"required\">*</span></label>\n                <input type=\"number\" name=\"wordCount\" id=\"wordCount\" required placeholder=\"1000\" min=\"100\" max=\"5000\">\n            </div>\n            <div class=\"form-group\">\n                <label for=\"tone\">Writing Tone & Style</label>\n                <input type=\"text\" name=\"tone\" id=\"tone\" placeholder=\"professional, casual, technical, persuasive, friendly (optional - defaults to professional)\">\n            </div>\n            <button type=\"submit\" id=\"submitBtn\">Generate Article ✨</button>\n            <div class=\"loading\" id=\"loading\">\n                <div class=\"spinner\"></div>\n                <p>Generating your article... This may take a few minutes.</p>\n            </div>\n        </form>\n    </div>\n    <script>\n        document.getElementById('articleForm').addEventListener('submit', function() {\n            document.getElementById('submitBtn').style.display = 'none';\n            document.getElementById('loading').style.display = 'block';\n        });\n    </script>\n</body>\n</html>",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html"
+              }
+            ]
+          }
+        }
+      },
+      "id": "acb2c437-18a6-45de-9a32-116b057cb96d",
+      "name": "Show Form",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -1216,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1b2c3d4",
+              "name": "prompt",
+              "value": "={{ $json.body.prompt }}",
+              "type": "string"
+            },
+            {
+              "id": "e5f6g7h8",
+              "name": "wordCount",
+              "value": "={{ parseInt($json.body.wordCount) }}",
+              "type": "number"
+            },
+            {
+              "id": "i9j0k1l2",
+              "name": "tone",
+              "value": "={{ $json.body.tone || 'professional' }}",
+              "type": "string"
+            },
+            {
+              "id": "m3n4o5p6",
+              "name": "rewriteAttempts",
+              "value": 0,
+              "type": "number"
+            },
+            {
+              "id": "q7r8s9t0",
+              "name": "maxAttempts",
+              "value": 5,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d7411e8a-5927-4c52-8e39-0dd1e78bd219",
+      "name": "Initialize Variables",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1424,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-5",
+          "mode": "list",
+          "cachedResultName": "GPT-5"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "Write a comprehensive article on the following topic:\n\nTopic: {{ $json.prompt }}\nTarget Word Count: {{ $json.wordCount }} words\nTone/Style: {{ $json.tone }}\n\nRequirements:\n1. Create an engaging title\n2. Write a well-structured article with introduction, body paragraphs, and conclusion\n3. Use natural language and varied sentence structures\n4. Include relevant examples and details\n5. Ensure the content is informative and valuable\n6. Aim for approximately {{ $json.wordCount }} words\n\nProvide the output in the following JSON format:\n{\n  \"title\": \"Article Title\",\n  \"content\": \"Full article content here\"\n}"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "id": "d6430ea1-79a0-4b00-8b80-0d3607c3f5d3",
+      "name": "Generate Initial Article",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.5,
+      "position": [
+        -1200,
+        288
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "2nipFUqTLSnWySli",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "u1v2w3x4",
+              "name": "article",
+              "value": "={{ $json.message.content }}",
+              "type": "object"
+            },
+            {
+              "id": "y5z6a7b8",
+              "name": "currentContent",
+              "value": "={{ JSON.parse($json.message.content).content }}",
+              "type": "string"
+            },
+            {
+              "id": "c9d0e1f2",
+              "name": "title",
+              "value": "={{ JSON.parse($json.message.content).title }}",
+              "type": "string"
+            },
+            {
+              "id": "g3h4i5j6",
+              "name": "rewriteAttempts",
+              "value": "={{ $node['Initialize Variables'].json.rewriteAttempts }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1fe960b2-c4f2-4f11-8475-7ff2fb856bba",
+      "name": "Parse Article",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -992,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.sapling.ai/api/v1/aidetect",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"key\": \"{{ $credentials.saplingApiKey }}\",\n  \"text\": \"{{ $json.currentContent }}\"\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "2d3ee19d-6d32-429a-be95-2dd5a9ec64c3",
+      "name": "Check AI Detection Score",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -768,
+        288
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "FstcHCwFpzR1Bf7T",
+          "name": "Sapling API"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "k7l8m9n0",
+              "name": "aiScore",
+              "value": "={{ $json.score * 100 }}",
+              "type": "number"
+            },
+            {
+              "id": "o1p2q3r4",
+              "name": "needsRewrite",
+              "value": "={{ ($json.score * 100) > 10 }}",
+              "type": "boolean"
+            },
+            {
+              "id": "s5t6u7v8",
+              "name": "currentContent",
+              "value": "={{ $node['Parse Article'].json.currentContent }}",
+              "type": "string"
+            },
+            {
+              "id": "w9x0y1z2",
+              "name": "title",
+              "value": "={{ $node['Parse Article'].json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "a3b4c5d6",
+              "name": "rewriteAttempts",
+              "value": "={{ $node['Parse Article'].json.rewriteAttempts }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7d48008f-5405-4e99-b9a7-13a4b188805b",
+      "name": "Process AI Score",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -544,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.needsRewrite }}",
+              "value2": true
+            }
+          ],
+          "number": [
+            {
+              "value1": "={{ $json.rewriteAttempts }}",
+              "operation": "smaller",
+              "value2": 5
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e490e7ed-8642-4463-9038-b253eeff9371",
+      "name": "Check If Needs Rewrite",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -320,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are an expert content editor specializing in making AI-generated content indistinguishable from human writing. The article below has an AI detection score of {{ $json.aiScore }}% and needs to be rewritten to sound more naturally human while maintaining its core message and quality.\n\nORIGINAL CONTEXT AND INSTRUCTIONS: {{ $node['Initialize Variables'].json.prompt }}\n\nCURRENT REWRITE ATTEMPT: {{ $json.rewriteAttempts + 1 }} of 5\n\nREWRITING GUIDELINES:\n1. **Sentence Variation**: Mix short punchy sentences with longer, complex ones. Avoid repetitive patterns.\n2. **Personal Touch**: Add subtle personal insights, opinions, or \"in my experience\" type statements where appropriate\n3. **Natural Flow**: Use transitional phrases that humans naturally use (\"That said...\", \"Here's the thing...\", \"What's interesting is...\")\n4. **Imperfect Structure**: Occasionally break formal writing rules naturally (start sentences with \"And\" or \"But\" when it feels right)\n5. **Conversational Elements**: Include rhetorical questions, direct reader address, or casual asides\n6. **Authentic Voice**: Make it sound like it's written by someone with real expertise and genuine passion for the topic\n7. **Subtle Inconsistencies**: Add minor stylistic variations that humans naturally have\n8. **Emotional Resonance**: Include subtle emotional cues that show the writer cares about the reader's success\n\nMAINTAIN THESE ELEMENTS:\n- Same approximate word count ({{ $node['Initialize Variables'].json.wordCount }} words)\n- Core message and valuable information\n- Target audience appropriateness from original context\n- Professional quality and credibility\n- The article's original purpose and intent\n\nORIGINAL ARTICLE TO REWRITE:\nTitle: {{ $json.title }}\nContent: {{ $json.currentContent }}\n\nRewrite this to sound like it was written by a human expert who genuinely cares about the topic and the reader's success. Make it engaging, authentic, and naturally imperfect while keeping all the valuable information intact. The goal is to reduce the AI detection score significantly while improving readability and engagement.\n\nProvide the output in the following JSON format:\n{\n  \"title\": \"Rewritten Title (can be slightly modified for better human appeal)\",\n  \"content\": \"Rewritten article content that sounds naturally human\"\n}"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.9
+        }
+      },
+      "id": "a1693ee9-7fe9-4364-9c22-9f5ca7691f09",
+      "name": "Rewrite Article",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.5,
+      "position": [
+        -112,
+        176
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "2nipFUqTLSnWySli",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "v5w6x7y8",
+              "name": "currentContent",
+              "value": "={{ JSON.parse($json.message.content).content }}",
+              "type": "string"
+            },
+            {
+              "id": "z9a0b1c2",
+              "name": "title",
+              "value": "={{ JSON.parse($json.message.content).title }}",
+              "type": "string"
+            },
+            {
+              "id": "d3e4f5g6",
+              "name": "rewriteAttempts",
+              "value": "={{ $node['Process AI Score'].json.rewriteAttempts + 1 }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "37b21f00-e612-43e6-86a3-67097f733902",
+      "name": "Update After Rewrite",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        128,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Count words in the content\nconst content = $input.item.json.currentContent;\nconst wordCount = content.trim().split(/\\s+/).length;\n\n// Get original prompt and other data\nconst originalPrompt = $node['Initialize Variables'].json.prompt;\nconst aiScore = $input.item.json.aiScore || 0;\n\nreturn {\n  title: $input.item.json.title,\n  content: content,\n  wordCount: wordCount,\n  aiScore: aiScore,\n  originalPrompt: originalPrompt,\n  creationDate: new Date().toISOString()\n};"
+      },
+      "id": "4a9126a6-bbe2-4632-b14f-5de3c0d47b96",
+      "name": "Prepare Notion Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -112,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "value": "24c35915-0a1c-8098-9db7-d957fd097573",
+          "mode": "list",
+          "cachedResultName": "articlebot",
+          "cachedResultUrl": "https://www.notion.so/24c359150a1c80989db7d957fd097573"
+        },
+        "title": "={{ $json.title }}",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Content",
+              "richText": "={{ $json.content }}"
+            },
+            {
+              "key": "Word Count"
+            },
+            {
+              "key": "AI Score"
+            },
+            {
+              "key": "Creation Date",
+              "date": "={{ $json.creationDate }}"
+            },
+            {
+              "key": "Original Prompt"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6aa1162a-003e-4a06-8a23-7fb73b50a5db",
+      "name": "Save to Notion",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        128,
+        416
+      ],
+      "credentials": {
+        "notionApi": {
+          "id": "D9bz3rJBe1495Dpq",
+          "name": "Notion account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=<!DOCTYPE html>\n<html>\n<head>\n    <title>Article Generation Complete</title>\n    <style>\n        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }\n        .container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }\n        h1 { color: #333; text-align: center; margin-bottom: 20px; }\n        .success { color: #27ae60; font-weight: bold; font-size: 1.2em; text-align: center; margin-bottom: 30px; }\n        .info { background: linear-gradient(135deg, #667eea15, #764ba215); padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #667eea; }\n        .metric { display: inline-block; margin-right: 30px; margin-bottom: 10px; }\n        .label { font-weight: bold; color: #666; }\n        .value { color: #333; font-size: 1.1em; }\n        .actions { text-align: center; margin-top: 30px; }\n        .btn { display: inline-block; padding: 12px 24px; margin: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; transition: transform 0.2s; }\n        .btn:hover { transform: translateY(-2px); }\n        .title-display { background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0; font-style: italic; }\n    </style>\n</head>\n<body>\n    <div class=\"container\">\n        <h1>✅ Article Successfully Generated!</h1>\n        <p class=\"success\">Your article has been created and saved to Notion!</p>\n        \n        <div class=\"title-display\">\n            <strong>Article Title:</strong> {{ $json.title }}\n        </div>\n        \n        <div class=\"info\">\n            <div class=\"metric\">\n                <span class=\"label\">Word Count:</span>\n                <span class=\"value\">{{ $json.wordCount }}</span>\n            </div>\n            <div class=\"metric\">\n                <span class=\"label\">AI Detection Score:</span>\n                <span class=\"value\">{{ $json.aiScore }}%</span>\n            </div>\n            <div class=\"metric\">\n                <span class=\"label\">Rewrite Attempts:</span>\n                <span class=\"value\">{{ $node['Process AI Score'].json.rewriteAttempts }}</span>\n            </div>\n        </div>\n        \n        <div class=\"actions\">\n            <a href=\"/webhook/article-generator\" class=\"btn\">Generate Another Article</a>\n        </div>\n    </div>\n</body>\n</html>",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html"
+              }
+            ]
+          }
+        }
+      },
+      "id": "2c93137b-d8f4-4746-abde-1784249574ed",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        336,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f0c6a569-4951-4ee3-a1d2-4954322e88ce",
+      "name": "Check Error Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.1,
+      "position": [
+        -544,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "errorMessage": "Sapling AI detection service error!"
+      },
+      "id": "42bbf9b5-504e-4dbf-ba0b-62138ea5fba4",
+      "name": "AI Detection Error",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "630dd420-fc05-4dd0-be46-2f5e61b6b1f0",
+      "name": "Check Notion Error",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.1,
+      "position": [
+        336,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "errorMessage": "Error occurred in Notion App!"
+      },
+      "id": "8a6295d9-0923-4648-b018-0ff0e21a92ab",
+      "name": "Notion Error",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        560,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bdded059-b5fd-4efb-a593-2da3023f30ea",
+      "name": "Check OpenAI Error",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.1,
+      "position": [
+        -992,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "errorMessage": "OpenAI Rate Limit exceeded !"
+      },
+      "id": "4a856f44-6d7c-4de4-8624-1d6ec9ffaa46",
+      "name": "OpenAI Rate Limit Error",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -768,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## AI Article Generator Webhook Workflow\n\n### How it works:\n1. GET request shows the HTML form\n2. POST request processes the form data\n3. Generates article with AI detection\n4. Saves to Notion and shows success page\n\n### Setup Required:\n- OpenAI API credentials\n- Sapling AI API key  \n- Notion API credentials\n- Webhook URL: /webhook/article-generator",
+        "height": 280,
+        "width": 300,
+        "color": 4
+      },
+      "id": "5b5662b2-54bc-4ee2-a067-99a1b718d792",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1840,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Smart Form Handling\n- GET request → Shows HTML form\n- POST request → Processes form data\n- Automatic rewrite loop for human-like content\n- Beautiful success page with metrics",
+        "width": 260,
+        "color": 7
+      },
+      "id": "4aa5ed7e-e6ad-4a7f-ab1c-53a07aa02cd4",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        -80
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Check Form Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Form Data": {
+      "main": [
+        [
+          {
+            "node": "Initialize Variables",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Show Form",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialize Variables": {
+      "main": [
+        [
+          {
+            "node": "Generate Initial Article",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Initial Article": {
+      "main": [
+        [
+          {
+            "node": "Parse Article",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check OpenAI Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Article": {
+      "main": [
+        [
+          {
+            "node": "Check AI Detection Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check AI Detection Score": {
+      "main": [
+        [
+          {
+            "node": "Process AI Score",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check Error Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process AI Score": {
+      "main": [
+        [
+          {
+            "node": "Check If Needs Rewrite",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check If Needs Rewrite": {
+      "main": [
+        [
+          {
+            "node": "Rewrite Article",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Notion Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rewrite Article": {
+      "main": [
+        [
+          {
+            "node": "Update After Rewrite",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update After Rewrite": {
+      "main": [
+        [
+          {
+            "node": "Check AI Detection Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Notion Data": {
+      "main": [
+        [
+          {
+            "node": "Save to Notion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save to Notion": {
+      "main": [
+        [
+          {
+            "node": "Success Response",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check Notion Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Error Type": {
+      "main": [
+        [
+          {
+            "node": "AI Detection Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Notion Error": {
+      "main": [
+        [
+          {
+            "node": "Notion Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check OpenAI Error": {
+      "main": [
+        [
+          {
+            "node": "OpenAI Rate Limit Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "60dba5b4-20e9-4c1d-937f-0512669f4595",
+  "meta": {
+    "instanceId": "78ce5a5377274f9298837c1f5755493b7a72f2a100b80c779f56af39bf59618a"
+  },
+  "id": "id7uaMG6gC1dM0wz",
+  "tags": []
+}
