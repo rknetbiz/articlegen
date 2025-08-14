@@ -197,6 +197,16 @@
             font-weight: bold;
         }
         
+        .error-message {
+            color: #e74c3c;
+            margin-top: 8px;
+            font-size: 0.9rem;
+            padding: 8px 12px;
+            background-color: #fdecea;
+            border-radius: 6px;
+            border-left: 3px solid #e74c3c;
+        }
+        
         @media (max-width: 768px) {
             .form-container {
                 padding: 30px 20px;
@@ -217,17 +227,18 @@
     <div class="form-container">
         <div class="header">
             <h1>🤖 AI Article Generator</h1>
-            <p class="subtitle">Generate high-quality, human-like articles with AI detection and automatic publishing to Notion</p>
+            <p class="subtitle">Generate high-quality, human-like articles with AI detection and automatic publishing to Airtable</p>
         </div>
         
         <div class="feature-list">
             <h3>✨ What you'll get:</h3>
             <ul>
-                <li>Professional article written by GPT-4</li>
-                <li>AI detection scoring and automatic rewriting</li>
-                <li>Human-like content that passes AI detectors</li>
-                <li>Automatic saving to your Notion database</li>
-                <li>Word count and performance metrics</li>
+                <li>Professional article written by GPT-4 Turbo</li>
+                <li>AI detection scoring (Sapling.ai)</li>
+                <li>Automatic rewriting for human-like content</li>
+                <li>Target AI score under 10%</li>
+                <li>Automatic saving to Airtable</li>
+                <li>Detailed performance metrics</li>
             </ul>
         </div>
         
@@ -281,10 +292,11 @@
                 <div class="loading-text">Generating your article...</div>
                 <div class="loading-steps">
                     This process includes:<br>
-                    • Writing the initial article<br>
+                    • Writing the initial article (GPT-4 Turbo)<br>
                     • Checking AI detection score<br>
-                    • Rewriting for human-like content<br>
-                    • Saving to Notion database
+                    • Rewriting for human-like content (if needed)<br>
+                    • Saving to Airtable database<br>
+                    • Final quality check
                 </div>
             </div>
         </form>
@@ -292,35 +304,54 @@
     
     <script>
         document.getElementById('articleForm').addEventListener('submit', function(e) {
-            // Show loading state
-            document.getElementById('submitBtn').style.display = 'none';
-            document.getElementById('loading').classList.add('show');
-            
-            // Optional: Add form validation
             const prompt = document.getElementById('prompt').value.trim();
-            const wordCount = document.getElementById('wordCount').value;
+            const wordCount = parseInt(document.getElementById('wordCount').value);
+            const errorElement = document.createElement('div');
+            errorElement.className = 'error-message';
             
+            // Clear previous errors
+            document.querySelectorAll('.error-message').forEach(el => el.remove());
+            
+            // Validate prompt
             if (!prompt || prompt.length < 20) {
                 e.preventDefault();
-                alert('Please enter a detailed prompt (at least 20 characters)');
-                document.getElementById('submitBtn').style.display = 'block';
-                document.getElementById('loading').classList.remove('show');
+                errorElement.textContent = 'Please enter a detailed prompt (at least 20 characters)';
+                document.getElementById('prompt').after(errorElement);
+                resetLoadingState();
                 return;
             }
             
-            if (!wordCount || wordCount < 100 || wordCount > 5000) {
+            // Validate word count
+            if (isNaN(wordCount)) {
                 e.preventDefault();
-                alert('Please enter a word count between 100 and 5000');
-                document.getElementById('submitBtn').style.display = 'block';
-                document.getElementById('loading').classList.remove('show');
+                errorElement.textContent = 'Please enter a valid number for word count';
+                document.getElementById('wordCount').after(errorElement);
+                resetLoadingState();
                 return;
             }
+            
+            if (wordCount < 100 || wordCount > 5000) {
+                e.preventDefault();
+                errorElement.textContent = 'Word count must be between 100 and 5000';
+                document.getElementById('wordCount').after(errorElement);
+                resetLoadingState();
+                return;
+            }
+            
+            // If all validations pass, proceed with submission
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('loading').classList.add('show');
         });
-        
+
+        function resetLoadingState() {
+            document.getElementById('submitBtn').style.display = 'block';
+            document.getElementById('loading').classList.remove('show');
+        }
+
         // Auto-resize textarea
         document.getElementById('prompt').addEventListener('input', function() {
             this.style.height = 'auto';
-            this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+            this.style.height = Math.min(this.scrollHeight, 300) + 'px';
         });
     </script>
 </body>
