@@ -1,0 +1,277 @@
+{
+  "name": "Articlebot_deepseek",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "article-generation",
+        "options": {}
+      },
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        -48
+      ],
+      "webhookId": "article-generation-webhook",
+      "id": "99df78ef-5686-48fd-a465-24dfce443f62"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Set Initial Variables",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [
+        32,
+        -48
+      ],
+      "id": "b87ebb48-decf-431c-8f0a-634d9f6db0fc"
+    },
+    {
+      "parameters": {},
+      "name": "OpenAI Article Generation",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 3,
+      "position": [
+        256,
+        -48
+      ],
+      "id": "86dcbfb9-4a03-4122-8f45-5be38fda6e88",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "2nipFUqTLSnWySli"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.sapling.ai/api/v1/aidetect",
+        "options": {
+          "response": {
+            "response": {}
+          }
+        }
+      },
+      "name": "Sapling AI Detection",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        480,
+        -48
+      ],
+      "id": "cef57df3-cfeb-4da7-97c8-d75f40269946"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition1",
+              "leftValue": "={{ $('Sapling AI Detection').json['score'] * 100 }}",
+              "rightValue": "={{ $('Set Initial Variables').json['targetAIScore'] }}",
+              "operator": {
+                "type": "number",
+                "operation": "smaller"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "name": "AI Score Evaluation",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        688,
+        -48
+      ],
+      "id": "9302c8dc-b540-483e-8072-c121eb9d0380"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Increment Attempt Counter",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [
+        688,
+        160
+      ],
+      "id": "884f81a9-d6f6-412b-90f3-06b782a00757"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition1",
+              "leftValue": "={{ $json.attemptCount }}",
+              "rightValue": "={{ $('Set Initial Variables').json['maxAttempts'] }}",
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "name": "Check Max Attempts",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        896,
+        160
+      ],
+      "id": "5c746876-d691-4c44-90dd-4ebdc92eeaad"
+    },
+    {
+      "parameters": {},
+      "name": "Article Rewrite",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 3,
+      "position": [
+        896,
+        352
+      ],
+      "id": "db01da69-63aa-4890-8c05-83e319ca3a94",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "2nipFUqTLSnWySli"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "name": "Loop Back Node",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        352
+      ],
+      "id": "a1f08157-b421-4046-b983-f63366b1222b"
+    },
+    {
+      "parameters": {},
+      "name": "Airtable Save",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 3,
+      "position": [
+        1120,
+        -48
+      ],
+      "id": "e7020dd8-eab1-40dc-80f3-45ffc501b768",
+      "credentials": {
+        "airtableApi": {
+          "id": null,
+          "name": "lsSVzmWHf9W8pVYi"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1328,
+        -48
+      ],
+      "id": "8b47cedc-fdec-4060-b0b9-49909d8765d9"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Max Attempts Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1328,
+        160
+      ],
+      "id": "3483e5de-8940-466c-a959-d70f3d0d93b3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Initial Variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sapling AI Detection": {
+      "main": [
+        [
+          {
+            "node": "AI Score Evaluation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Increment Attempt Counter": {
+      "main": [
+        [
+          {
+            "node": "Check Max Attempts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Back Node": {
+      "main": [
+        [
+          {
+            "node": "Sapling AI Detection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6854df4f-0dbb-4157-b15e-8906c5c61fad",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "78ce5a5377274f9298837c1f5755493b7a72f2a100b80c779f56af39bf59618a"
+  },
+  "id": "vxjT1A47U3pQPQ4L",
+  "tags": []
+}
