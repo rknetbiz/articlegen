@@ -11,11 +11,11 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
       "position": [
-        -192,
-        -48
+        -1008,
+        -96
       ],
       "webhookId": "article-generation-webhook",
-      "id": "99df78ef-5686-48fd-a465-24dfce443f62"
+      "id": "2da97e9a-e8f2-4763-8c63-15fd6e0aed3a"
     },
     {
       "parameters": {
@@ -25,10 +25,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3,
       "position": [
-        32,
-        -48
+        -784,
+        -96
       ],
-      "id": "b87ebb48-decf-431c-8f0a-634d9f6db0fc"
+      "id": "8f0e497d-f907-4440-a44f-cbd3d38fb236"
     },
     {
       "parameters": {},
@@ -36,14 +36,14 @@
       "type": "n8n-nodes-base.openAi",
       "typeVersion": 3,
       "position": [
-        256,
-        -48
+        -576,
+        -96
       ],
-      "id": "86dcbfb9-4a03-4122-8f45-5be38fda6e88",
+      "id": "c548c60e-f670-4c68-a7bc-1904eee05a97",
       "credentials": {
         "openAiApi": {
-          "id": null,
-          "name": "2nipFUqTLSnWySli"
+          "id": "2nipFUqTLSnWySli",
+          "name": "OpenAi account"
         }
       }
     },
@@ -60,10 +60,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
       "position": [
-        480,
-        -48
+        -352,
+        -96
       ],
-      "id": "cef57df3-cfeb-4da7-97c8-d75f40269946"
+      "id": "a0fc4011-5c53-472c-b325-ab69804ae350"
     },
     {
       "parameters": {
@@ -76,8 +76,8 @@
           "conditions": [
             {
               "id": "condition1",
-              "leftValue": "={{ $('Sapling AI Detection').json['score'] * 100 }}",
-              "rightValue": "={{ $('Set Initial Variables').json['targetAIScore'] }}",
+              "leftValue": "={{ $(\"Sapling AI Detection\").json[\"score\"] * 100 }}",
+              "rightValue": "={{ $(\"Set Initial Variables\").json[\"targetAIScore\"] }}",
               "operator": {
                 "type": "number",
                 "operation": "smaller"
@@ -92,10 +92,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        688,
-        -48
+        -128,
+        -96
       ],
-      "id": "9302c8dc-b540-483e-8072-c121eb9d0380"
+      "id": "d53724bb-3563-4cb4-8bad-8c4c04829e0f"
     },
     {
       "parameters": {
@@ -105,10 +105,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3,
       "position": [
-        688,
-        160
+        -128,
+        112
       ],
-      "id": "884f81a9-d6f6-412b-90f3-06b782a00757"
+      "id": "87f3f835-cbb2-4d5d-a087-1f923ea01702"
     },
     {
       "parameters": {
@@ -122,7 +122,7 @@
             {
               "id": "condition1",
               "leftValue": "={{ $json.attemptCount }}",
-              "rightValue": "={{ $('Set Initial Variables').json['maxAttempts'] }}",
+              "rightValue": "={{ $(\"Set Initial Variables\").json[\"maxAttempts\"] }}",
               "operator": {
                 "type": "number",
                 "operation": "gte"
@@ -137,10 +137,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        896,
-        160
+        80,
+        112
       ],
-      "id": "5c746876-d691-4c44-90dd-4ebdc92eeaad"
+      "id": "95f88ff7-9902-4e48-80c6-f7168fec888f"
     },
     {
       "parameters": {},
@@ -148,14 +148,14 @@
       "type": "n8n-nodes-base.openAi",
       "typeVersion": 3,
       "position": [
-        896,
-        352
+        80,
+        304
       ],
-      "id": "db01da69-63aa-4890-8c05-83e319ca3a94",
+      "id": "a498508e-7263-468d-94cb-fd77c21eac67",
       "credentials": {
         "openAiApi": {
-          "id": null,
-          "name": "2nipFUqTLSnWySli"
+          "id": "2nipFUqTLSnWySli",
+          "name": "OpenAi account"
         }
       }
     },
@@ -167,10 +167,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 2,
       "position": [
-        1120,
-        352
+        304,
+        304
       ],
-      "id": "a1f08157-b421-4046-b983-f63366b1222b"
+      "id": "6f974100-ad11-44d4-bc7f-c12900b4d8cb"
     },
     {
       "parameters": {},
@@ -178,14 +178,14 @@
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 3,
       "position": [
-        1120,
-        -48
+        304,
+        -96
       ],
-      "id": "e7020dd8-eab1-40dc-80f3-45ffc501b768",
+      "id": "01b99e42-f9a7-407c-9463-1d3cce1a931e",
       "credentials": {
         "airtableApi": {
-          "id": null,
-          "name": "lsSVzmWHf9W8pVYi"
+          "id": "lsSVzmWHf9W8pVYi",
+          "name": "Airtable API"
         }
       }
     },
@@ -197,10 +197,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
       "position": [
-        1328,
-        -48
+        512,
+        -96
       ],
-      "id": "8b47cedc-fdec-4060-b0b9-49909d8765d9"
+      "id": "c1050f4c-82e9-48c0-9f78-a95866f80df5"
     },
     {
       "parameters": {
@@ -210,10 +210,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
       "position": [
-        1328,
-        160
+        512,
+        112
       ],
-      "id": "3483e5de-8940-466c-a959-d70f3d0d93b3"
+      "id": "c3c1a19f-da4b-4f71-b7bb-505125c9d96e"
     }
   ],
   "pinData": {},
@@ -267,7 +267,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "6854df4f-0dbb-4157-b15e-8906c5c61fad",
+  "versionId": "1de5c8c3-8be1-43cf-b72d-b75263d0144a",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "78ce5a5377274f9298837c1f5755493b7a72f2a100b80c779f56af39bf59618a"
