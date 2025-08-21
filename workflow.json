@@ -1,5 +1,5 @@
 {
-  "name": "articlegen",
+  "name": "articlegen_airtable",
   "nodes": [
     {
       "parameters": {
@@ -8,15 +8,28 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "7789604c-e5e1-4804-a827-eca9d19f382a",
+      "id": "3fd0dbe6-b3c1-489a-a844-e912af37d49f",
       "name": "Webhook Trigger",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        -1648,
-        192
+        -2656,
+        48
       ],
-      "webhookId": "428bae04-2a86-48aa-a5f6-15215d40f035"
+      "webhookId": "f89c1d5f-2b92-4754-a227-92d20b48eee3"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse URL-encoded form data\nif ($input.item.json.body && typeof $input.item.json.body === 'object') {\n    // Data is already parsed (likely from test execution)\n    return $input.item.json;\n} else {\n    // Parse the raw body for actual webhook calls\n    const parsedBody = {};\n    const body = $input.item.json.body || '';\n    \n    body.split('&').forEach(pair => {\n        const [key, value] = pair.split('=');\n        parsedBody[key] = decodeURIComponent(value || '');\n    });\n    \n    return {\n        ...$input.item.json,\n        body: parsedBody\n    };\n}"
+      },
+      "id": "1757ec8a-c34c-48a4-834a-769a9ac0f515",
+      "name": "Parse Form Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2432,
+        48
+      ]
     },
     {
       "parameters": {
@@ -24,16 +37,35 @@
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "strict"
+            "typeValidation": "strict",
+            "version": 2
           },
           "conditions": [
             {
               "id": "condition1",
-              "leftValue": "={{ $json.body.prompt }}",
+              "leftValue": "={{ $json.body && $json.body.prompt }}",
               "rightValue": "",
               "operator": {
                 "type": "string",
                 "operation": "notEmpty"
+              }
+            },
+            {
+              "id": "condition2",
+              "leftValue": "={{ parseInt($json.body.wordCount) }}",
+              "rightValue": 100,
+              "operator": {
+                "type": "number",
+                "operation": "largerEqual"
+              }
+            },
+            {
+              "id": "condition3",
+              "leftValue": "={{ parseInt($json.body.wordCount) }}",
+              "rightValue": 1500,
+              "operator": {
+                "type": "number",
+                "operation": "smallerEqual"
               }
             }
           ],
@@ -41,19 +73,19 @@
         },
         "options": {}
       },
-      "id": "98fa16a5-d371-4966-b815-89493a384544",
+      "id": "a475e819-4586-4d66-a8ed-8407cae9ea61",
       "name": "Check Form Data",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -1472,
-        192
+        -2656,
+        1440
       ]
     },
     {
       "parameters": {
         "respondWith": "text",
-        "responseBody": "<!DOCTYPE html>\n<html>\n<head>\n    <title>AI Article Generator</title>\n    <style>\n        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 700px; margin: 50px auto; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }\n        .form-container { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }\n        h1 { color: #333; text-align: center; margin-bottom: 10px; font-size: 2.5em; }\n        .subtitle { color: #666; text-align: center; margin-bottom: 30px; font-size: 1.1em; }\n        .form-group { margin-bottom: 25px; }\n        label { display: block; margin-bottom: 8px; font-weight: 600; color: #555; font-size: 1.1em; }\n        input, textarea { width: 100%; padding: 15px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px; transition: border-color 0.3s; box-sizing: border-box; }\n        input:focus, textarea:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }\n        textarea { height: 120px; resize: vertical; font-family: inherit; }\n        button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; font-weight: 600; width: 100%; transition: transform 0.2s; }\n        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }\n        button:active { transform: translateY(0); }\n        .required { color: #e74c3c; }\n        .loading { display: none; text-align: center; margin-top: 20px; }\n        .spinner { border: 3px solid #f3f3f3; border-top: 3px solid #667eea; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto; }\n        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }\n    </style>\n</head>\n<body>\n    <div class=\"form-container\">\n        <h1>🤖 AI Article Generator</h1>\n        <p class=\"subtitle\">Generate high-quality articles with AI detection and automatic publishing</p>\n        <form id=\"articleForm\" method=\"POST\">\n            <div class=\"form-group\">\n                <label for=\"prompt\">Article Prompt <span class=\"required\">*</span></label>\n                <textarea name=\"prompt\" id=\"prompt\" required placeholder=\"Enter your detailed article prompt. For example: 'Act as a copywriter for a health company. Write persuasive content about custom vegan diet plans that help people lose weight naturally...'\"></textarea>\n            </div>\n            <div class=\"form-group\">\n                <label for=\"wordCount\">Target Word Count <span class=\"required\">*</span></label>\n                <input type=\"number\" name=\"wordCount\" id=\"wordCount\" required placeholder=\"1000\" min=\"100\" max=\"5000\">\n            </div>\n            <div class=\"form-group\">\n                <label for=\"tone\">Writing Tone & Style</label>\n                <input type=\"text\" name=\"tone\" id=\"tone\" placeholder=\"professional, casual, technical, persuasive, friendly (optional - defaults to professional)\">\n            </div>\n            <button type=\"submit\" id=\"submitBtn\">Generate Article ✨</button>\n            <div class=\"loading\" id=\"loading\">\n                <div class=\"spinner\"></div>\n                <p>Generating your article... This may take a few minutes.</p>\n            </div>\n        </form>\n    </div>\n    <script>\n        document.getElementById('articleForm').addEventListener('submit', function() {\n            document.getElementById('submitBtn').style.display = 'none';\n            document.getElementById('loading').style.display = 'block';\n        });\n    </script>\n</body>\n</html>",
+        "responseBody": "<!DOCTYPE html>\n<html>\n<head>\n    <title>AI Article Generator</title>\n    <style>\n        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 700px; margin: 50px auto; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }\n        .form-container { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }\n        h1 { color: #333; text-align: center; margin-bottom: 10px; font-size: 2.5em; }\n        .subtitle { color: #666; text-align: center; margin-bottom: 30px; font-size: 1.1em; }\n        .form-group { margin-bottom: 25px; }\n        label { display: block; margin-bottom: 8px; font-weight: 600; color: #555; font-size: 1.1em; }\n        input, textarea { width: 100%; padding: 15px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px; transition: border-color 0.3s; box-sizing: border-box; }\n        input:focus, textarea:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }\n        textarea { height: 120px; resize: vertical; font-family: inherit; }\n        button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; font-weight: 600; width: 100%; transition: transform 0.2s; }\n        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }\n        button:active { transform: translateY(0); }\n        .required { color: #e74c3c; }\n        .loading { display: none; text-align: center; margin-top: 20px; }\n        .spinner { border: 3px solid #f3f3f3; border-top: 3px solid #667eea; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto; }\n        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }\n        .error { color: #e74c3c; margin-top: 10px; }\n    </style>\n</head>\n<body>\n    <div class=\"form-container\">\n        <h1>ðŸ¤– AI Article Generator</h1>\n        <p class=\"subtitle\">Generate high-quality articles with AI detection and automatic publishing</p>\n        <form id=\"articleForm\" method=\"POST\">\n            <div class=\"form-group\">\n                <label for=\"prompt\">Article Prompt <span class=\"required\">*</span></label>\n                <textarea name=\"prompt\" id=\"prompt\" required placeholder=\"Enter your detailed article prompt. For example: 'Act as a copywriter for a health company. Write persuasive content about custom vegan diet plans that help people lose weight naturally...'\"></textarea>\n            </div>\n            <div class=\"form-group\">\n                <label for=\"wordCount\">Target Word Count <span class=\"required\">*</span></label>\n                <input type=\"number\" name=\"wordCount\" id=\"wordCount\" required placeholder=\"1000\" min=\"100\" max=\"5000\">\n                <div id=\"wordCountError\" class=\"error\" style=\"display: none;\">Word count must be between 100 and 5000</div>\n            </div>\n            <div class=\"form-group\">\n                <label for=\"tone\">Writing Tone & Style</label>\n                <input type=\"text\" name=\"tone\" id=\"tone\" placeholder=\"professional, casual, technical, persuasive, friendly (optional - defaults to professional)\">\n            </div>\n            <button type=\"submit\" id=\"submitBtn\">Generate Article âœ¨</button>\n            <div class=\"loading\" id=\"loading\">\n                <div class=\"spinner\"></div>\n                <p>Generating your article... This may take a few minutes.</p>\n            </div>\n        </form>\n    </div>\n    <script>\n        document.getElementById('articleForm').addEventListener('submit', function(e) {\n            const wordCount = parseInt(document.getElementById('wordCount').value);\n            const errorElement = document.getElementById('wordCountError');\n            \n            if (wordCount < 100 || wordCount > 5000) {\n                e.preventDefault();\n                errorElement.style.display = 'block';\n                return false;\n            } else {\n                errorElement.style.display = 'none';\n                document.getElementById('submitBtn').style.display = 'none';\n                document.getElementById('loading').style.display = 'block';\n            }\n        });\n    </script>\n</body>\n</html>",
         "options": {
           "responseCode": 200,
           "responseHeaders": {
@@ -66,13 +98,38 @@
           }
         }
       },
-      "id": "acb2c437-18a6-45de-9a32-116b057cb96d",
+      "id": "5f1d06c0-bb06-46dd-9262-d110915236d4",
       "name": "Show Form",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        -1216,
-        80
+        -2208,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "<!DOCTYPE html>\n<html>\n<head>\n    <title>Validation Error</title>\n    <style>\n        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }\n        .container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }\n        h1 { color: #e74c3c; text-align: center; margin-bottom: 20px; }\n        .error-message { background: #fdecea; padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #e74c3c; }\n        .actions { text-align: center; margin-top: 30px; }\n        .btn { display: inline-block; padding: 12px 24px; margin: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; transition: transform 0.2s; }\n        .btn:hover { transform: translateY(-2px); }\n    </style>\n</head>\n<body>\n    <div class=\"container\">\n        <h1>âš ï¸ Validation Error</h1>\n        <div class=\"error-message\">\n            <p>Please provide both a prompt and a valid word count (between 100 and 5000 words).</p>\n        </div>\n        <div class=\"actions\">\n            <a href=\"/webhook/article-generator\" class=\"btn\">Try Again</a>\n        </div>\n    </div>\n</body>\n</html>",
+        "options": {
+          "responseCode": 400,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html"
+              }
+            ]
+          }
+        }
+      },
+      "id": "3c9b9fd7-a518-434c-a419-4be0d2454d71",
+      "name": "Validation Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -2656,
+        992
       ]
     },
     {
@@ -106,48 +163,56 @@
             {
               "id": "q7r8s9t0",
               "name": "maxAttempts",
-              "value": 5,
+              "value": 3,
+              "type": "number"
+            },
+            {
+              "id": "u1v2w3x4",
+              "name": "targetAIScore",
+              "value": 10,
               "type": "number"
             }
           ]
         },
         "options": {}
       },
-      "id": "d7411e8a-5927-4c52-8e39-0dd1e78bd219",
+      "id": "aab6cf03-b7de-4a65-b77c-58a36d69ca80",
       "name": "Initialize Variables",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -1424,
-        288
+        -2208,
+        240
       ]
     },
     {
       "parameters": {
         "modelId": {
           "__rl": true,
-          "value": "gpt-5",
+          "value": "gpt-4-turbo",
           "mode": "list",
-          "cachedResultName": "GPT-5"
+          "cachedResultName": "GPT-4-Turbo"
         },
         "messages": {
           "values": [
             {
-              "content": "Write a comprehensive article on the following topic:\n\nTopic: {{ $json.prompt }}\nTarget Word Count: {{ $json.wordCount }} words\nTone/Style: {{ $json.tone }}\n\nRequirements:\n1. Create an engaging title\n2. Write a well-structured article with introduction, body paragraphs, and conclusion\n3. Use natural language and varied sentence structures\n4. Include relevant examples and details\n5. Ensure the content is informative and valuable\n6. Aim for approximately {{ $json.wordCount }} words\n\nProvide the output in the following JSON format:\n{\n  \"title\": \"Article Title\",\n  \"content\": \"Full article content here\"\n}"
+              "content": "=\"Write a comprehensive article on the following topic:\\n\\nTopic: ={{ $json.prompt }}\\nTarget Word Count: ={{ $json.wordCount }} words\\nTone/Style: ={{ $json.tone }}\\n\\n**Formatting Requirements:**\\n1. # [Catchy Headline in H1]\\n2. [Engaging introduction paragraph]\\n3. ## [Main Section Heading in H2]\\n4. [Content paragraph]\\n5. ### [Subsection in H3 if needed]\\n6. [Content paragraph]\\n7. - Use bullet points for lists\\n8. - Like this example\\n9. ## [Another Main Section in H2]\\n10. [More content]\\n11. # Conclusion\\n12. [Summary of key points]\\n\\nProvide the output in this exact JSON format:\\n{\\n  \\\"title\\\": \\\"Article Title\\\",\\n  \\\"content\\\": \\\"Full article content with Markdown formatting\\\"\\n}\""
             }
           ]
         },
+        "jsonOutput": true,
         "options": {
+          "maxTokens": "={{ Math.min($json.wordCount * 1.5, 4000) }}",
           "temperature": 0.7
         }
       },
-      "id": "d6430ea1-79a0-4b00-8b80-0d3607c3f5d3",
+      "id": "1cb5dc6f-e5fe-458f-b48b-13143d16f49e",
       "name": "Generate Initial Article",
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.5,
       "position": [
-        -1200,
-        288
+        -1984,
+        240
       ],
       "credentials": {
         "openAiApi": {
@@ -158,51 +223,21 @@
     },
     {
       "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "u1v2w3x4",
-              "name": "article",
-              "value": "={{ $json.message.content }}",
-              "type": "object"
-            },
-            {
-              "id": "y5z6a7b8",
-              "name": "currentContent",
-              "value": "={{ JSON.parse($json.message.content).content }}",
-              "type": "string"
-            },
-            {
-              "id": "c9d0e1f2",
-              "name": "title",
-              "value": "={{ JSON.parse($json.message.content).title }}",
-              "type": "string"
-            },
-            {
-              "id": "g3h4i5j6",
-              "name": "rewriteAttempts",
-              "value": "={{ $node['Initialize Variables'].json.rewriteAttempts }}",
-              "type": "number"
-            }
-          ]
-        },
-        "options": {}
+        "jsCode": "// Debug: Log the raw response\nconsole.log('Raw OpenAI Response:', JSON.stringify($input.item.json, null, 2));\n\nconst response = $input.item.json;\nlet article = null;\nlet currentContent = null;\nlet title = null;\n\n// Try multiple ways to extract the content\nif (response.message && response.message.content) {\n    const content = response.message.content;\n    console.log('Message content:', content);\n    \n    try {\n        // Try parsing as JSON\n        article = JSON.parse(content);\n        currentContent = article.content || null;\n        title = article.title || null;\n        console.log('Successfully parsed JSON:', { title, contentLength: currentContent?.length });\n    } catch (e) {\n        console.log('JSON parse failed:', e.message);\n        // If JSON parsing fails, treat the entire content as the article\n        currentContent = content;\n        title = 'Generated Article';\n        article = { title, content: currentContent };\n    }\n} else if (response.content) {\n    // Alternative path if content is directly available\n    try {\n        article = JSON.parse(response.content);\n        currentContent = article.content || null;\n        title = article.title || null;\n    } catch (e) {\n        currentContent = response.content;\n        title = 'Generated Article';\n        article = { title, content: currentContent };\n    }\n} else {\n    console.log('No content found in response');\n}\n\nreturn {\n    article: article,\n    currentContent: currentContent,\n    title: title,\n    rewriteAttempts: $node['Initialize Variables'].json.rewriteAttempts,\n    debug: {\n        hasMessage: !!response.message,\n        hasContent: !!response.content,\n        messageContentType: typeof response.message?.content,\n        rawResponse: response\n    }\n};"
       },
-      "id": "1fe960b2-c4f2-4f11-8475-7ff2fb856bba",
+      "id": "5c2a869a-28dc-47d2-9177-36d3b7f8268c",
       "name": "Parse Article",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
-        -992,
-        288
+        -1632,
+        240
       ]
     },
     {
       "parameters": {
         "method": "POST",
         "url": "https://api.sapling.ai/api/v1/aidetect",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -213,26 +248,23 @@
           ]
         },
         "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "{\n  \"key\": \"{{ $credentials.saplingApiKey }}\",\n  \"text\": \"{{ $json.currentContent }}\"\n}",
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
         "options": {
           "timeout": 30000
         }
       },
-      "id": "2d3ee19d-6d32-429a-be95-2dd5a9ec64c3",
+      "id": "08434974-88eb-459c-9ec2-b28a23c93fa4",
       "name": "Check AI Detection Score",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -768,
-        288
+        -1184,
+        240
       ],
-      "credentials": {
-        "httpHeaderAuth": {
-          "id": "FstcHCwFpzR1Bf7T",
-          "name": "Sapling API"
-        }
-      },
       "onError": "continueErrorOutput"
     },
     {
@@ -242,13 +274,13 @@
             {
               "id": "k7l8m9n0",
               "name": "aiScore",
-              "value": "={{ $json.score * 100 }}",
+              "value": "={{ $json.score ? $json.score * 100 : 0 }}",
               "type": "number"
             },
             {
               "id": "o1p2q3r4",
               "name": "needsRewrite",
-              "value": "={{ ($json.score * 100) > 10 }}",
+              "value": "={{ ($json.score ? ($json.score * 100) : 0) > $node['Initialize Variables'].json.targetAIScore }}",
               "type": "boolean"
             },
             {
@@ -273,69 +305,85 @@
         },
         "options": {}
       },
-      "id": "7d48008f-5405-4e99-b9a7-13a4b188805b",
+      "id": "5d750eea-7956-46e0-8496-f91aa5444ba0",
       "name": "Process AI Score",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -544,
-        288
+        -960,
+        48
       ]
     },
     {
       "parameters": {
         "conditions": {
-          "boolean": [
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
             {
-              "value1": "={{ $json.needsRewrite }}",
-              "value2": true
+              "id": "condition1",
+              "leftValue": "={{ $json.needsRewrite }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "condition2",
+              "leftValue": "={{ $json.rewriteAttempts }}",
+              "rightValue": "={{ $node['Initialize Variables'].json.maxAttempts }}",
+              "operator": {
+                "type": "number",
+                "operation": "smaller"
+              }
             }
           ],
-          "number": [
-            {
-              "value1": "={{ $json.rewriteAttempts }}",
-              "operation": "smaller",
-              "value2": 5
-            }
-          ]
+          "combinator": "and"
         },
         "options": {}
       },
-      "id": "e490e7ed-8642-4463-9038-b253eeff9371",
+      "id": "399a8053-8330-4459-9dae-6a4d81067c9c",
       "name": "Check If Needs Rewrite",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -320,
-        288
+        -736,
+        48
       ]
     },
     {
       "parameters": {
         "modelId": {
           "__rl": true,
-          "value": "gpt-4o",
+          "value": "gpt-4-turbo",
           "mode": "list",
-          "cachedResultName": "GPT-4O"
+          "cachedResultName": "GPT-4-Turbo"
         },
         "messages": {
           "values": [
             {
-              "content": "You are an expert content editor specializing in making AI-generated content indistinguishable from human writing. The article below has an AI detection score of {{ $json.aiScore }}% and needs to be rewritten to sound more naturally human while maintaining its core message and quality.\n\nORIGINAL CONTEXT AND INSTRUCTIONS: {{ $node['Initialize Variables'].json.prompt }}\n\nCURRENT REWRITE ATTEMPT: {{ $json.rewriteAttempts + 1 }} of 5\n\nREWRITING GUIDELINES:\n1. **Sentence Variation**: Mix short punchy sentences with longer, complex ones. Avoid repetitive patterns.\n2. **Personal Touch**: Add subtle personal insights, opinions, or \"in my experience\" type statements where appropriate\n3. **Natural Flow**: Use transitional phrases that humans naturally use (\"That said...\", \"Here's the thing...\", \"What's interesting is...\")\n4. **Imperfect Structure**: Occasionally break formal writing rules naturally (start sentences with \"And\" or \"But\" when it feels right)\n5. **Conversational Elements**: Include rhetorical questions, direct reader address, or casual asides\n6. **Authentic Voice**: Make it sound like it's written by someone with real expertise and genuine passion for the topic\n7. **Subtle Inconsistencies**: Add minor stylistic variations that humans naturally have\n8. **Emotional Resonance**: Include subtle emotional cues that show the writer cares about the reader's success\n\nMAINTAIN THESE ELEMENTS:\n- Same approximate word count ({{ $node['Initialize Variables'].json.wordCount }} words)\n- Core message and valuable information\n- Target audience appropriateness from original context\n- Professional quality and credibility\n- The article's original purpose and intent\n\nORIGINAL ARTICLE TO REWRITE:\nTitle: {{ $json.title }}\nContent: {{ $json.currentContent }}\n\nRewrite this to sound like it was written by a human expert who genuinely cares about the topic and the reader's success. Make it engaging, authentic, and naturally imperfect while keeping all the valuable information intact. The goal is to reduce the AI detection score significantly while improving readability and engagement.\n\nProvide the output in the following JSON format:\n{\n  \"title\": \"Rewritten Title (can be slightly modified for better human appeal)\",\n  \"content\": \"Rewritten article content that sounds naturally human\"\n}"
+              "content": "You are an expert content editor specializing in making AI-generated content indistinguishable from human writing. The article below has an AI detection score of {{ $json.aiScore }}% and needs to be rewritten to sound more naturally human while maintaining its core message and quality.\n\nORIGINAL CONTEXT AND INSTRUCTIONS: {{ $node['Initialize Variables'].json.prompt }}\n\nCURRENT REWRITE ATTEMPT: {{ $json.rewriteAttempts + 1 }} of {{ $node['Initialize Variables'].json.maxAttempts }}\n\n**REWRITING GUIDELINES:**\n1. **Sentence Variation**: Mix short punchy sentences with longer, complex ones. Avoid repetitive patterns.\n2. **Personal Touch**: Add subtle personal insights, opinions, or \"in my experience\" type statements where appropriate\n3. **Natural Flow**: Use transitional phrases that humans naturally use (\"That said...\", \"Here's the thing...\", \"What's interesting is...\")\n4. **Imperfect Structure**: Occasionally break formal writing rules naturally (start sentences with \"And\" or \"But\" when it feels right)\n5. **Conversational Elements**: Include rhetorical questions, direct reader address, or casual asides\n6. **Authentic Voice**: Make it sound like it's written by someone with real expertise and genuine passion for the topic\n7. **Subtle Inconsistencies**: Add minor stylistic variations that humans naturally have\n8. **Emotional Resonance**: Include subtle emotional cues that show the writer cares about the reader's success\n\n**MAINTAIN THESE ELEMENTS:**\n- Proper Markdown formatting (H1, H2, H3 headings, bullet points)\n- Same approximate word count ({{ $node['Initialize Variables'].json.wordCount }} words)\n- Core message and valuable information\n- Target audience appropriateness from original context\n- Professional quality and credibility\n- The article's original purpose and intent\n\n**ORIGINAL ARTICLE TO REWRITE:**\nTitle: {{ $json.title }}\nContent: {{ $json.currentContent }}\n\nRewrite this to sound like it was written by a human expert who genuinely cares about the topic and the reader's success. Make it engaging, authentic, and naturally imperfect while keeping all the valuable information intact. The goal is to reduce the AI detection score significantly while improving readability and engagement.\n\nProvide the output in the following JSON format:\n{\n  \"title\": \"Rewritten Title (can be slightly modified for better human appeal)\",\n  \"content\": \"Rewritten article content that sounds naturally human with proper Markdown formatting\"\n}"
             }
           ]
         },
+        "jsonOutput": true,
         "options": {
+          "maxTokens": "={{ Math.min($node['Initialize Variables'].json.wordCount * 1.5, 4000) }}",
           "temperature": 0.9
         }
       },
-      "id": "a1693ee9-7fe9-4364-9c22-9f5ca7691f09",
+      "id": "76e7dc05-0c26-475e-9eab-ab34e37d38f0",
       "name": "Rewrite Article",
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.5,
       "position": [
-        -112,
-        176
+        -512,
+        -48
       ],
       "credentials": {
         "openAiApi": {
@@ -351,13 +399,13 @@
             {
               "id": "v5w6x7y8",
               "name": "currentContent",
-              "value": "={{ JSON.parse($json.message.content).content }}",
+              "value": "={{ $json.message && $json.message.content ? (function() { try { const parsed = JSON.parse($json.message.content); return parsed.content || $node['Process AI Score'].json.currentContent; } catch(e) { return $node['Process AI Score'].json.currentContent; } })() : $node['Process AI Score'].json.currentContent }}",
               "type": "string"
             },
             {
               "id": "z9a0b1c2",
               "name": "title",
-              "value": "={{ JSON.parse($json.message.content).title }}",
+              "value": "={{ $json.message && $json.message.content ? (function() { try { const parsed = JSON.parse($json.message.content); return parsed.title || $node['Process AI Score'].json.title; } catch(e) { return $node['Process AI Score'].json.title; } })() : $node['Process AI Score'].json.title }}",
               "type": "string"
             },
             {
@@ -370,82 +418,32 @@
         },
         "options": {}
       },
-      "id": "37b21f00-e612-43e6-86a3-67097f733902",
+      "id": "e80b5da1-59f8-40fb-b2b8-de7768745300",
       "name": "Update After Rewrite",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        128,
-        176
+        -160,
+        128
       ]
     },
     {
       "parameters": {
-        "jsCode": "// Count words in the content\nconst content = $input.item.json.currentContent;\nconst wordCount = content.trim().split(/\\s+/).length;\n\n// Get original prompt and other data\nconst originalPrompt = $node['Initialize Variables'].json.prompt;\nconst aiScore = $input.item.json.aiScore || 0;\n\nreturn {\n  title: $input.item.json.title,\n  content: content,\n  wordCount: wordCount,\n  aiScore: aiScore,\n  originalPrompt: originalPrompt,\n  creationDate: new Date().toISOString()\n};"
+        "jsCode": "// Count words in the content\nconst content = $input.item.json.currentContent;\nconst wordCount = content ? content.trim().split(/\\s+/).length : 0;\n\n// Get original prompt and other data\nconst originalPrompt = $node['Initialize Variables'].json.prompt;\nconst aiScore = $input.item.json.aiScore || 0;\nconst rewriteAttempts = $input.item.json.rewriteAttempts || 0;\n\nreturn {\n  title: $input.item.json.title,\n  content: content,\n  wordCount: wordCount,\n  aiScore: aiScore,\n  originalPrompt: originalPrompt,\n  rewriteAttempts: rewriteAttempts,\n  creationDate: new Date().toISOString()\n};"
       },
-      "id": "4a9126a6-bbe2-4632-b14f-5de3c0d47b96",
-      "name": "Prepare Notion Data",
+      "id": "9472ba5e-f5a5-417d-875c-ec474d33a45e",
+      "name": "Prepare Airtable Data",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -112,
-        416
+        -448,
+        144
       ]
-    },
-    {
-      "parameters": {
-        "resource": "databasePage",
-        "databaseId": {
-          "__rl": true,
-          "value": "24c35915-0a1c-8098-9db7-d957fd097573",
-          "mode": "list",
-          "cachedResultName": "articlebot",
-          "cachedResultUrl": "https://www.notion.so/24c359150a1c80989db7d957fd097573"
-        },
-        "title": "={{ $json.title }}",
-        "propertiesUi": {
-          "propertyValues": [
-            {
-              "key": "Content",
-              "richText": "={{ $json.content }}"
-            },
-            {
-              "key": "Word Count"
-            },
-            {
-              "key": "AI Score"
-            },
-            {
-              "key": "Creation Date",
-              "date": "={{ $json.creationDate }}"
-            },
-            {
-              "key": "Original Prompt"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "6aa1162a-003e-4a06-8a23-7fb73b50a5db",
-      "name": "Save to Notion",
-      "type": "n8n-nodes-base.notion",
-      "typeVersion": 2.2,
-      "position": [
-        128,
-        416
-      ],
-      "credentials": {
-        "notionApi": {
-          "id": "D9bz3rJBe1495Dpq",
-          "name": "Notion account"
-        }
-      },
-      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
         "respondWith": "text",
-        "responseBody": "=<!DOCTYPE html>\n<html>\n<head>\n    <title>Article Generation Complete</title>\n    <style>\n        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }\n        .container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }\n        h1 { color: #333; text-align: center; margin-bottom: 20px; }\n        .success { color: #27ae60; font-weight: bold; font-size: 1.2em; text-align: center; margin-bottom: 30px; }\n        .info { background: linear-gradient(135deg, #667eea15, #764ba215); padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #667eea; }\n        .metric { display: inline-block; margin-right: 30px; margin-bottom: 10px; }\n        .label { font-weight: bold; color: #666; }\n        .value { color: #333; font-size: 1.1em; }\n        .actions { text-align: center; margin-top: 30px; }\n        .btn { display: inline-block; padding: 12px 24px; margin: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; transition: transform 0.2s; }\n        .btn:hover { transform: translateY(-2px); }\n        .title-display { background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0; font-style: italic; }\n    </style>\n</head>\n<body>\n    <div class=\"container\">\n        <h1>✅ Article Successfully Generated!</h1>\n        <p class=\"success\">Your article has been created and saved to Notion!</p>\n        \n        <div class=\"title-display\">\n            <strong>Article Title:</strong> {{ $json.title }}\n        </div>\n        \n        <div class=\"info\">\n            <div class=\"metric\">\n                <span class=\"label\">Word Count:</span>\n                <span class=\"value\">{{ $json.wordCount }}</span>\n            </div>\n            <div class=\"metric\">\n                <span class=\"label\">AI Detection Score:</span>\n                <span class=\"value\">{{ $json.aiScore }}%</span>\n            </div>\n            <div class=\"metric\">\n                <span class=\"label\">Rewrite Attempts:</span>\n                <span class=\"value\">{{ $node['Process AI Score'].json.rewriteAttempts }}</span>\n            </div>\n        </div>\n        \n        <div class=\"actions\">\n            <a href=\"/webhook/article-generator\" class=\"btn\">Generate Another Article</a>\n        </div>\n    </div>\n</body>\n</html>",
+        "responseBody": "=<!DOCTYPE html>\n<html>\n<head>\n    <title>Article Generation Complete</title>\n    <style>\n        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }\n        .container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }\n        h1 { color: #333; text-align: center; margin-bottom: 20px; }\n        .success { color: #27ae60; font-weight: bold; font-size: 1.2em; text-align: center; margin-bottom: 30px; }\n        .info { background: linear-gradient(135deg, #667eea15, #764ba215); padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #667eea; }\n        .metric { display: inline-block; margin-right: 30px; margin-bottom: 10px; }\n        .label { font-weight: bold; color: #666; }\n        .value { color: #333; font-size: 1.1em; }\n        .actions { text-align: center; margin-top: 30px; }\n        .btn { display: inline-block; padding: 12px 24px; margin: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; transition: transform 0.2s; }\n        .btn:hover { transform: translateY(-2px); }\n        .title-display { background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0; font-style: italic; }\n    </style>\n</head>\n<body>\n    <div class=\"container\">\n        <h1>âœ… Article Successfully Generated!</h1>\n        <p class=\"success\">Your article has been created and saved to Airtable!</p>\n        \n        <div class=\"title-display\">\n            <strong>Article Title:</strong> {{ $json.title }}\n        </div>\n        \n        <div class=\"info\">\n            <div class=\"metric\">\n                <span class=\"label\">Word Count:</span>\n                <span class=\"value\">{{ $json.wordCount }}</span>\n            </div>\n            <div class=\"metric\">\n                <span class=\"label\">AI Detection Score:</span>\n                <span class=\"value\">{{ $json.aiScore }}%</span>\n            </div>\n            <div class=\"metric\">\n                <span class=\"label\">Rewrite Attempts:</span>\n                <span class=\"value\">{{ $json.rewriteAttempts }}</span>\n            </div>\n        </div>\n        \n        <div class=\"actions\">\n            <a href=\"/webhook/article-generator\" class=\"btn\">Generate Another Article</a>\n        </div>\n    </div>\n</body>\n</html>",
         "options": {
           "responseCode": 200,
           "responseHeaders": {
@@ -458,195 +456,263 @@
           }
         }
       },
-      "id": "2c93137b-d8f4-4746-abde-1784249574ed",
+      "id": "0bed8462-a0a5-4b49-9be3-7d7fa08539a6",
       "name": "Success Response",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        336,
-        416
+        64,
+        352
       ]
     },
     {
       "parameters": {
-        "rules": {
-          "values": [
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appVHyWpZjm1GLoKz",
+          "mode": "list",
+          "cachedResultName": "ArticleStore",
+          "cachedResultUrl": "https://airtable.com/appVHyWpZjm1GLoKz"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblkudiRSoJwf4Q4F",
+          "mode": "list",
+          "cachedResultName": "Articles",
+          "cachedResultUrl": "https://airtable.com/appVHyWpZjm1GLoKz/tblkudiRSoJwf4Q4F"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Title": "\"={{ $json.title }}\"",
+            "Content": "\"={{ $json.content }}\"",
+            "AI Score": "=\"={{ $json.aiScore }}\"",
+            "Word Count": "=\"={{ $json.wordCount }}\"",
+            "Original Prompt": "\"={{ $json.originalPrompt }}\"",
+            "Rewrite Attempts": "=\"={{ $json.rewriteAttempts }}\"",
+            "Creation Date": "=\"={{ $json.creationDate }}\""
+          },
+          "matchingColumns": [],
+          "schema": [
             {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "",
-                    "rightValue": "",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    }
-                  }
-                ],
-                "combinator": "and"
-              }
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Content",
+              "displayName": "Content",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Word Count",
+              "displayName": "Word Count",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "AI Score",
+              "displayName": "AI Score",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Original Prompt",
+              "displayName": "Original Prompt",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Rewrite Attempts",
+              "displayName": "Rewrite Attempts",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Creation Date",
+              "displayName": "Creation Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
             }
-          ]
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
         },
         "options": {}
       },
-      "id": "f0c6a569-4951-4ee3-a1d2-4954322e88ce",
-      "name": "Check Error Type",
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.1,
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
       "position": [
-        -544,
-        512
+        -160,
+        352
+      ],
+      "id": "568485f4-d3e8-4b4e-aad0-aeabd8dd4d94",
+      "name": "Save to Airtable",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "lsSVzmWHf9W8pVYi",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "<!DOCTYPE html>\n<html>\n<head>\n    <title>Error Generating Article</title>\n    <style>\n        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }\n        .container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }\n        h1 { color: #e74c3c; text-align: center; margin-bottom: 20px; }\n        .error-message { background: #fdecea; padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #e74c3c; }\n        .actions { text-align: center; margin-top: 30px; }\n        .btn { display: inline-block; padding: 12px 24px; margin: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; transition: transform 0.2s; }\n        .btn:hover { transform: translateY(-2px); }\n    </style>\n</head>\n<body>\n    <div class=\"container\">\n        <h1>âš ï¸ Error Generating Article</h1>\n        <div class=\"error-message\">\n            <p>We encountered an error while generating your article. Please try again later.</p>\n            <p>Error details: {{ $json.error }}</p>\n        </div>\n        <div class=\"actions\">\n            <a href=\"/webhook/article-generator\" class=\"btn\">Try Again</a>\n        </div>\n    </div>\n</body>\n</html>",
+        "options": {
+          "responseCode": 500,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html"
+              }
+            ]
+          }
+        }
+      },
+      "id": "6f5750c1-9cd5-43e0-a4cd-eb66080c3783",
+      "name": "Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -2656,
+        768
       ]
     },
     {
       "parameters": {
         "errorMessage": "Sapling AI detection service error!"
       },
-      "id": "42bbf9b5-504e-4dbf-ba0b-62138ea5fba4",
+      "id": "c423d4c5-332e-4a2b-b482-31436d61bd31",
       "name": "AI Detection Error",
       "type": "n8n-nodes-base.stopAndError",
       "typeVersion": 1,
       "position": [
-        -320,
-        512
+        -960,
+        368
       ]
     },
     {
       "parameters": {
-        "rules": {
-          "values": [
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "",
-                    "rightValue": "",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    }
-                  }
-                ],
-                "combinator": "and"
-              }
-            }
-          ]
-        },
-        "options": {}
+        "errorMessage": "Content parsing failed - unable to extract article content from OpenAI response. Please check the OpenAI model configuration and JSON output setting."
       },
-      "id": "630dd420-fc05-4dd0-be46-2f5e61b6b1f0",
-      "name": "Check Notion Error",
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.1,
-      "position": [
-        336,
-        512
-      ]
-    },
-    {
-      "parameters": {
-        "errorMessage": "Error occurred in Notion App!"
-      },
-      "id": "8a6295d9-0923-4648-b018-0ff0e21a92ab",
-      "name": "Notion Error",
+      "id": "c8527413-bacb-4ef7-bf9a-9f2397cfdfc5",
+      "name": "Content Parse Error",
       "type": "n8n-nodes-base.stopAndError",
       "typeVersion": 1,
       "position": [
-        560,
-        512
+        -2432,
+        544
       ]
     },
     {
       "parameters": {
-        "rules": {
-          "values": [
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "",
-                    "rightValue": "",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    }
-                  }
-                ],
-                "combinator": "and"
-              }
-            }
-          ]
-        },
-        "options": {}
+        "errorMessage": "Airtable Error!"
       },
-      "id": "bdded059-b5fd-4efb-a593-2da3023f30ea",
-      "name": "Check OpenAI Error",
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.1,
-      "position": [
-        -992,
-        512
-      ]
-    },
-    {
-      "parameters": {
-        "errorMessage": "OpenAI Rate Limit exceeded !"
-      },
-      "id": "4a856f44-6d7c-4de4-8624-1d6ec9ffaa46",
-      "name": "OpenAI Rate Limit Error",
+      "id": "aae2d936-a550-448e-b46a-5439d27b0923",
+      "name": "Airtable Error",
       "type": "n8n-nodes-base.stopAndError",
       "typeVersion": 1,
       "position": [
-        -768,
-        512
+        -2656,
+        1216
       ]
     },
     {
       "parameters": {
-        "content": "## AI Article Generator Webhook Workflow\n\n### How it works:\n1. GET request shows the HTML form\n2. POST request processes the form data\n3. Generates article with AI detection\n4. Saves to Notion and shows success page\n\n### Setup Required:\n- OpenAI API credentials\n- Sapling AI API key  \n- Notion API credentials\n- Webhook URL: /webhook/article-generator",
-        "height": 280,
-        "width": 300,
-        "color": 4
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "condition1",
+              "leftValue": "={{ $json.currentContent }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "condition2",
+              "leftValue": "={{ $json.currentContent }}",
+              "rightValue": {},
+              "operator": {
+                "type": "object",
+                "operation": "notEqual"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
       },
-      "id": "5b5662b2-54bc-4ee2-a067-99a1b718d792",
-      "name": "Sticky Note",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
+      "id": "f91cd753-8647-4fa5-b3d1-f9a7ad76711d",
+      "name": "Check Content Valid",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
       "position": [
-        -1840,
-        176
+        -2656,
+        544
       ]
     },
     {
       "parameters": {
-        "content": "### Smart Form Handling\n- GET request → Shows HTML form\n- POST request → Processes form data\n- Automatic rewrite loop for human-like content\n- Beautiful success page with metrics",
-        "width": 260,
-        "color": 7
+        "jsCode": "// Prepare Sapling API request data\nconst content = $input.item.json.currentContent;\n\n// Your Sapling API key - replace with your actual key\nconst SAPLING_API_KEY = \"YOUR_SAPLING_API_KEY_HERE\";\n\n// Validate content\nif (!content || typeof content !== 'string' || content.trim().length === 0) {\n    throw new Error('No valid content available for AI detection');\n}\n\n// Clean and prepare the content (limit to 200k characters as per Sapling API)\nlet cleanContent = content\n    .replace(/[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\u007F]/g, '') // Remove control characters\n    .trim();\n\n// Limit content length (Sapling API has 200k character limit)\nif (cleanContent.length > 200000) {\n    cleanContent = cleanContent.substring(0, 200000);\n}\n\n// Prepare the request payload\nconst requestPayload = {\n    key: SAPLING_API_KEY,\n    text: cleanContent,\n    sent_scores: true\n};\n\nconsole.log('Preparing Sapling request for content length:', cleanContent.length);\n\nreturn {\n    // Pass through all existing data\n    ...($input.item.json),\n    // Add new fields for the API request\n    requestPayload: requestPayload,\n    requestPayloadString: JSON.stringify(requestPayload),\n    cleanContent: cleanContent\n};"
       },
-      "id": "4aa5ed7e-e6ad-4a7f-ab1c-53a07aa02cd4",
-      "name": "Sticky Note1",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
-        -144,
-        -80
-      ]
+        -1408,
+        240
+      ],
+      "id": "9f0dcd4a-5b7e-4692-a1f8-c80224715981",
+      "name": "Prepare Sapling Request"
     }
   ],
   "pinData": {},
@@ -655,25 +721,23 @@
       "main": [
         [
           {
-            "node": "Check Form Data",
+            "node": "Parse Form Data",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Check Form Data": {
+    "Parse Form Data": {
       "main": [
         [
           {
-            "node": "Initialize Variables",
+            "node": "Show Form",
             "type": "main",
             "index": 0
-          }
-        ],
-        [
+          },
           {
-            "node": "Show Form",
+            "node": "Initialize Variables",
             "type": "main",
             "index": 0
           }
@@ -698,11 +762,6 @@
             "node": "Parse Article",
             "type": "main",
             "index": 0
-          },
-          {
-            "node": "Check OpenAI Error",
-            "type": "main",
-            "index": 0
           }
         ]
       ]
@@ -711,7 +770,19 @@
       "main": [
         [
           {
-            "node": "Check AI Detection Score",
+            "node": "Prepare Sapling Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Content Valid": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Content Parse Error",
             "type": "main",
             "index": 0
           }
@@ -725,9 +796,11 @@
             "node": "Process AI Score",
             "type": "main",
             "index": 0
-          },
+          }
+        ],
+        [
           {
-            "node": "Check Error Type",
+            "node": "AI Detection Error",
             "type": "main",
             "index": 0
           }
@@ -749,14 +822,14 @@
       "main": [
         [
           {
-            "node": "Rewrite Article",
+            "node": "Prepare Airtable Data",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Prepare Notion Data",
+            "node": "Rewrite Article",
             "type": "main",
             "index": 0
           }
@@ -785,60 +858,33 @@
         ]
       ]
     },
-    "Prepare Notion Data": {
+    "Prepare Airtable Data": {
       "main": [
         [
           {
-            "node": "Save to Notion",
+            "node": "Save to Airtable",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Save to Notion": {
+    "Save to Airtable": {
       "main": [
         [
           {
             "node": "Success Response",
             "type": "main",
             "index": 0
-          },
-          {
-            "node": "Check Notion Error",
-            "type": "main",
-            "index": 0
           }
         ]
       ]
     },
-    "Check Error Type": {
+    "Prepare Sapling Request": {
       "main": [
         [
           {
-            "node": "AI Detection Error",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Check Notion Error": {
-      "main": [
-        [
-          {
-            "node": "Notion Error",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Check OpenAI Error": {
-      "main": [
-        [
-          {
-            "node": "OpenAI Rate Limit Error",
+            "node": "Check AI Detection Score",
             "type": "main",
             "index": 0
           }
@@ -850,10 +896,11 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "60dba5b4-20e9-4c1d-937f-0512669f4595",
+  "versionId": "42cf7354-8d73-411f-9600-72900678a283",
   "meta": {
+    "templateCredsSetupCompleted": true,
     "instanceId": "78ce5a5377274f9298837c1f5755493b7a72f2a100b80c779f56af39bf59618a"
   },
-  "id": "id7uaMG6gC1dM0wz",
+  "id": "Bf9AGXIu0FuqaKac",
   "tags": []
 }
