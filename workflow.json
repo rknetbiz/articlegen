@@ -8,13 +8,13 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "3fd0dbe6-b3c1-489a-a844-e912af37d49f",
+      "id": "f96858e3-e9c1-4645-a262-af138298a126",
       "name": "Webhook Trigger",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
         -2656,
-        48
+        -1232
       ],
       "webhookId": "f89c1d5f-2b92-4754-a227-92d20b48eee3"
     },
@@ -22,13 +22,13 @@
       "parameters": {
         "jsCode": "// Parse URL-encoded form data\nif ($input.item.json.body && typeof $input.item.json.body === 'object') {\n    // Data is already parsed (likely from test execution)\n    return $input.item.json;\n} else {\n    // Parse the raw body for actual webhook calls\n    const parsedBody = {};\n    const body = $input.item.json.body || '';\n    \n    body.split('&').forEach(pair => {\n        const [key, value] = pair.split('=');\n        parsedBody[key] = decodeURIComponent(value || '');\n    });\n    \n    return {\n        ...$input.item.json,\n        body: parsedBody\n    };\n}"
       },
-      "id": "1757ec8a-c34c-48a4-834a-769a9ac0f515",
+      "id": "bdff8acf-1e16-4276-a515-e55b755c607d",
       "name": "Parse Form Data",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
         -2432,
-        48
+        -1232
       ]
     },
     {
@@ -73,13 +73,13 @@
         },
         "options": {}
       },
-      "id": "a475e819-4586-4d66-a8ed-8407cae9ea61",
+      "id": "ab57e862-fb78-4628-8cf4-1b1060c18061",
       "name": "Check Form Data",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
         -2656,
-        1440
+        160
       ]
     },
     {
@@ -98,13 +98,13 @@
           }
         }
       },
-      "id": "5f1d06c0-bb06-46dd-9262-d110915236d4",
+      "id": "0b35ff54-593e-42fa-8c11-18365f2cc2ea",
       "name": "Show Form",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
         -2208,
-        48
+        -1232
       ]
     },
     {
@@ -123,13 +123,13 @@
           }
         }
       },
-      "id": "3c9b9fd7-a518-434c-a419-4be0d2454d71",
+      "id": "151853aa-530d-48e6-aae8-7e71a9e02db0",
       "name": "Validation Error Response",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
         -2656,
-        992
+        -288
       ]
     },
     {
@@ -176,13 +176,13 @@
         },
         "options": {}
       },
-      "id": "aab6cf03-b7de-4a65-b77c-58a36d69ca80",
+      "id": "2a66f76f-087f-45b9-92e9-9d49994e96fe",
       "name": "Initialize Variables",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
         -2208,
-        240
+        -1040
       ]
     },
     {
@@ -196,7 +196,7 @@
         "messages": {
           "values": [
             {
-              "content": "=\"Write a comprehensive article on the following topic:\\n\\nTopic: ={{ $json.prompt }}\\nTarget Word Count: ={{ $json.wordCount }} words\\nTone/Style: ={{ $json.tone }}\\n\\n**Formatting Requirements:**\\n1. # [Catchy Headline in H1]\\n2. [Engaging introduction paragraph]\\n3. ## [Main Section Heading in H2]\\n4. [Content paragraph]\\n5. ### [Subsection in H3 if needed]\\n6. [Content paragraph]\\n7. - Use bullet points for lists\\n8. - Like this example\\n9. ## [Another Main Section in H2]\\n10. [More content]\\n11. # Conclusion\\n12. [Summary of key points]\\n\\nProvide the output in this exact JSON format:\\n{\\n  \\\"title\\\": \\\"Article Title\\\",\\n  \\\"content\\\": \\\"Full article content with Markdown formatting\\\"\\n}\""
+              "content": "=\"Write a comprehensive article on the following topic:\\n\\nTopic: ={{ $json.prompt }}\\nTarget Word Count: ={{ $json.wordCount }} words\\nTone/Style: ={{ $json.tone }}\\n\\n**Formatting Requirements:**\\n1. # [Catchy Headline in H1]\\n2. [Engaging introduction paragraph]\\n3. ## [Main Section Heading in H2]\\n4. [Content paragraph]\\n5. ### [Subsection in H3 if needed]\\n6. [Content paragraph]\\n7. - Use bullet points for lists\\n8. - Like this example\\n9. ## [Another Main Section in H2]\\n10. [More content]\\n11. # Conclusion\\n12. [Summary of key points]\\n\\nProvide the output in this exact JSON format:\\n{\\n  \\\"title\\\": \\\"Article Title\\\",\\n  \\\"content\\\": \\\"Full article content with Markdown formatting\\\"}\""
             }
           ]
         },
@@ -206,13 +206,13 @@
           "temperature": 0.7
         }
       },
-      "id": "1cb5dc6f-e5fe-458f-b48b-13143d16f49e",
+      "id": "073d69e9-803b-4434-af85-26d382e22faa",
       "name": "Generate Initial Article",
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.5,
       "position": [
         -1984,
-        240
+        -1040
       ],
       "credentials": {
         "openAiApi": {
@@ -223,15 +223,15 @@
     },
     {
       "parameters": {
-        "jsCode": "// Debug: Log the raw response\nconsole.log('Raw OpenAI Response:', JSON.stringify($input.item.json, null, 2));\n\nconst response = $input.item.json;\nlet article = null;\nlet currentContent = null;\nlet title = null;\n\n// Try multiple ways to extract the content\nif (response.message && response.message.content) {\n    const content = response.message.content;\n    console.log('Message content:', content);\n    \n    try {\n        // Try parsing as JSON\n        article = JSON.parse(content);\n        currentContent = article.content || null;\n        title = article.title || null;\n        console.log('Successfully parsed JSON:', { title, contentLength: currentContent?.length });\n    } catch (e) {\n        console.log('JSON parse failed:', e.message);\n        // If JSON parsing fails, treat the entire content as the article\n        currentContent = content;\n        title = 'Generated Article';\n        article = { title, content: currentContent };\n    }\n} else if (response.content) {\n    // Alternative path if content is directly available\n    try {\n        article = JSON.parse(response.content);\n        currentContent = article.content || null;\n        title = article.title || null;\n    } catch (e) {\n        currentContent = response.content;\n        title = 'Generated Article';\n        article = { title, content: currentContent };\n    }\n} else {\n    console.log('No content found in response');\n}\n\nreturn {\n    article: article,\n    currentContent: currentContent,\n    title: title,\n    rewriteAttempts: $node['Initialize Variables'].json.rewriteAttempts,\n    debug: {\n        hasMessage: !!response.message,\n        hasContent: !!response.content,\n        messageContentType: typeof response.message?.content,\n        rawResponse: response\n    }\n};"
+        "jsCode": "// N8N JavaScript Code for Parse Article Node\n// This code transforms the input JSON array to the required output format\n\n// Get the input data from n8n\nconst inputData = $input.all();\n\n// Process each item in the input array\nconst outputData = inputData.map(item => {\n  // The input data structure: item.json contains the array\n  // Extract the first item from the array\n  const dataArray = Array.isArray(item.json) ? item.json : [item.json];\n  const firstItem = dataArray[0];\n  \n  // Extract the content from the message\n  const content = firstItem.message.content;\n  \n  // Extract title using regex since the content might be incomplete JSON\n  let extractedTitle = \"Unknown Article\"; // Fallback title\n  \n  // Use regex to find the title field in the JSON-like string\n  const titleMatch = content.match(/\"title\":\\s*\"([^\"]+)\"/);\n  if (titleMatch && titleMatch[1]) {\n    extractedTitle = titleMatch[1];\n  }\n  \n  // Create the output structure\n  const result = {\n    article: {\n      title: extractedTitle,\n      content: content\n    },\n    currentContent: content,\n    title: extractedTitle,\n    rewriteAttempts: $node['Initialize Variables'].json.rewriteAttempts,\n    debug: {\n      rawResponse: firstItem\n    }\n  };\n  \n  return {\n    json: result\n  };\n});\n\n// Return the processed data\nreturn outputData;"
       },
-      "id": "5c2a869a-28dc-47d2-9177-36d3b7f8268c",
+      "id": "69d11580-1e14-4dfc-b591-128e8814f198",
       "name": "Parse Article",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
         -1632,
-        240
+        -1040
       ]
     },
     {
@@ -250,21 +250,33 @@
         "sendBody": true,
         "bodyParameters": {
           "parameters": [
-            {}
+            {
+              "name": "key",
+              "value": "={{ $json['requestPayload'].key }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json['requestPayload'].text }}"
+            },
+            {
+              "name": "sent_scores",
+              "value": "={{ $json['requestPayload'].sent_scores }}"
+            }
           ]
         },
         "options": {
           "timeout": 30000
         }
       },
-      "id": "08434974-88eb-459c-9ec2-b28a23c93fa4",
+      "id": "555f1eff-3c87-48f7-a9c6-a26f7f81588a",
       "name": "Check AI Detection Score",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
         -1184,
-        240
+        -1040
       ],
+      "code": "// Validate content length and topic\nconst content = $input.item.json.currentContent;\n\n// Check if content is empty or malformed\nif (!content || content.trim().length === 0) {\n    throw new Error('Invalid content passed to AI Detection or Rewrite.');\n}\n\n// Check if content contains the correct topic (vegan diet or related terms)\nconst topicKeywords = ['vegan', 'plant-based', 'weight loss']; // Add relevant keywords from the original prompt\nconst containsTopic = topicKeywords.some(keyword => content.toLowerCase().includes(keyword.toLowerCase()));\n\nif (!containsTopic) {\n    throw new Error('Topic mismatch detected. The rewritten article strayed off the topic.');\n}\n\n// Clean content for the Sapling API request\nlet cleanContent = content.replace(/[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\u007F]/g, '').trim();\n\n// Prepare Sapling API request payload\nconst requestPayload = {\n    key: 'YOUR_SAPLING_API_KEY',  // Replace with actual API key or environment variable\n    text: cleanContent,\n    sent_scores: true\n};\n\nreturn {\n    ...$input.item.json,\n    requestPayload: requestPayload,\n    cleanContent: cleanContent\n};",
       "onError": "continueErrorOutput"
     },
     {
@@ -305,13 +317,13 @@
         },
         "options": {}
       },
-      "id": "5d750eea-7956-46e0-8496-f91aa5444ba0",
+      "id": "06dc6997-d8e0-409d-b369-43027f3bd6c0",
       "name": "Process AI Score",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
         -960,
-        48
+        -1232
       ]
     },
     {
@@ -347,13 +359,13 @@
         },
         "options": {}
       },
-      "id": "399a8053-8330-4459-9dae-6a4d81067c9c",
+      "id": "667ece9a-f35c-4a1a-a7ca-eabb4c192d46",
       "name": "Check If Needs Rewrite",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
         -736,
-        48
+        -1232
       ]
     },
     {
@@ -367,23 +379,22 @@
         "messages": {
           "values": [
             {
-              "content": "You are an expert content editor specializing in making AI-generated content indistinguishable from human writing. The article below has an AI detection score of {{ $json.aiScore }}% and needs to be rewritten to sound more naturally human while maintaining its core message and quality.\n\nORIGINAL CONTEXT AND INSTRUCTIONS: {{ $node['Initialize Variables'].json.prompt }}\n\nCURRENT REWRITE ATTEMPT: {{ $json.rewriteAttempts + 1 }} of {{ $node['Initialize Variables'].json.maxAttempts }}\n\n**REWRITING GUIDELINES:**\n1. **Sentence Variation**: Mix short punchy sentences with longer, complex ones. Avoid repetitive patterns.\n2. **Personal Touch**: Add subtle personal insights, opinions, or \"in my experience\" type statements where appropriate\n3. **Natural Flow**: Use transitional phrases that humans naturally use (\"That said...\", \"Here's the thing...\", \"What's interesting is...\")\n4. **Imperfect Structure**: Occasionally break formal writing rules naturally (start sentences with \"And\" or \"But\" when it feels right)\n5. **Conversational Elements**: Include rhetorical questions, direct reader address, or casual asides\n6. **Authentic Voice**: Make it sound like it's written by someone with real expertise and genuine passion for the topic\n7. **Subtle Inconsistencies**: Add minor stylistic variations that humans naturally have\n8. **Emotional Resonance**: Include subtle emotional cues that show the writer cares about the reader's success\n\n**MAINTAIN THESE ELEMENTS:**\n- Proper Markdown formatting (H1, H2, H3 headings, bullet points)\n- Same approximate word count ({{ $node['Initialize Variables'].json.wordCount }} words)\n- Core message and valuable information\n- Target audience appropriateness from original context\n- Professional quality and credibility\n- The article's original purpose and intent\n\n**ORIGINAL ARTICLE TO REWRITE:**\nTitle: {{ $json.title }}\nContent: {{ $json.currentContent }}\n\nRewrite this to sound like it was written by a human expert who genuinely cares about the topic and the reader's success. Make it engaging, authentic, and naturally imperfect while keeping all the valuable information intact. The goal is to reduce the AI detection score significantly while improving readability and engagement.\n\nProvide the output in the following JSON format:\n{\n  \"title\": \"Rewritten Title (can be slightly modified for better human appeal)\",\n  \"content\": \"Rewritten article content that sounds naturally human with proper Markdown formatting\"\n}"
+              "content": "You are an expert content editor specializing in making AI-generated content indistinguishable from human writing. The article below has an AI detection score of {{ $json.aiScore }}% and needs to be rewritten to sound more naturally human while maintaining its core message and quality.\n\n**IMPORTANT INSTRUCTIONS (NON-NEGOTIABLE)**:\n1. **Do not change the topic** of the article. The topic must remain exactly as stated: **{{ $node['Initialize Variables'].json.prompt }}**. If you are unsure, do not deviate from the original topic. The AI detection will fail if the topic is changed.\n2. **Do not introduce new subjects or unrelated themes** (e.g., the article should remain about **vegan diets**, and should not shift to any other domain).\n3. **If the topic is unclear, ask for clarification** instead of assuming or changing it. If clarification is not provided, **reject the request** by responding with: `{\"error\": \"TOPIC_DRIFT\"}`.\n4. **Maintain the same factual content**. Do not alter any facts, product names, or details.\n5. **Avoid excessive creativity**: Focus on making the article sound more natural without introducing irrelevant creativity. The AI should focus on **natural sentence variations** without distorting the core message.\n\n**REWRITING GUIDELINES**:\n1. **Sentence Variation**: Mix short punchy sentences with longer, complex ones. Avoid repetitive patterns.\n2. **Personal Touch**: Add subtle personal insights, opinions, or \"in my experience\" type statements where appropriate.\n3. **Natural Flow**: Use transitional phrases that humans naturally use (e.g., \"That said...\", \"Here's the thing...\", \"What's interesting is...\").\n4. **Imperfect Structure**: Occasionally break formal writing rules naturally (start sentences with \"And\" or \"But\" when it feels right).\n5. **Conversational Elements**: Include rhetorical questions, direct reader address, or casual asides.\n6. **Authentic Voice**: Make it sound like it's written by someone with real expertise and genuine passion for the topic.\n7. **Subtle Inconsistencies**: Add minor stylistic variations that humans naturally have.\n8. **Emotional Resonance**: Include subtle emotional cues that show the writer cares about the reader's success.\n\n**MAINTAIN THESE ELEMENTS**:\n- Proper Markdown formatting (H1, H2, H3 headings, bullet points).\n- Same approximate word count ({{ $node['Initialize Variables'].json.wordCount }} words).\n- Core message and valuable information.\n- Target audience appropriateness from original context.\n- Professional quality and credibility.\n- The article's original purpose and intent.\n\n**ORIGINAL ARTICLE TO REWRITE**:\nTitle: {{ $json.title }}\nContent: {{ $json.currentContent }}\n\nRewrite this to sound like it was written by a human expert who genuinely cares about the topic and the reader's success. Make it engaging, authentic, and naturally imperfect while keeping all the valuable information intact. The goal is to reduce the AI detection score significantly while improving readability and engagement.\n\nProvide the output in the following format:\n{\n  \"title\": \"Rewritten Title (same topic)\",\n  \"content\": \"Rewritten content in Markdown format\"\n}"
             }
           ]
         },
         "jsonOutput": true,
         "options": {
-          "maxTokens": "={{ Math.min($node['Initialize Variables'].json.wordCount * 1.5, 4000) }}",
-          "temperature": 0.9
+          "temperature": 0.2
         }
       },
-      "id": "76e7dc05-0c26-475e-9eab-ab34e37d38f0",
+      "id": "85a91c4a-ecf0-410e-a6e4-861747b843b3",
       "name": "Rewrite Article",
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.5,
       "position": [
         -512,
-        -48
+        -1328
       ],
       "credentials": {
         "openAiApi": {
@@ -399,45 +410,45 @@
             {
               "id": "v5w6x7y8",
               "name": "currentContent",
-              "value": "={{ $json.message && $json.message.content ? (function() { try { const parsed = JSON.parse($json.message.content); return parsed.content || $node['Process AI Score'].json.currentContent; } catch(e) { return $node['Process AI Score'].json.currentContent; } })() : $node['Process AI Score'].json.currentContent }}",
+              "value": "={{ $node['Rewrite Article'].json.content || $node['Process AI Score'].json.currentContent }}",
               "type": "string"
             },
             {
               "id": "z9a0b1c2",
               "name": "title",
-              "value": "={{ $json.message && $json.message.content ? (function() { try { const parsed = JSON.parse($json.message.content); return parsed.title || $node['Process AI Score'].json.title; } catch(e) { return $node['Process AI Score'].json.title; } })() : $node['Process AI Score'].json.title }}",
+              "value": "={{ $node['Rewrite Article'].json.title || $node['Process AI Score'].json.title }}",
               "type": "string"
             },
             {
               "id": "d3e4f5g6",
               "name": "rewriteAttempts",
-              "value": "={{ $node['Process AI Score'].json.rewriteAttempts + 1 }}",
+              "value": "={{ ($node['Process AI Score'].json.rewriteAttempts || 0) + 1 }}",
               "type": "number"
             }
           ]
         },
         "options": {}
       },
-      "id": "e80b5da1-59f8-40fb-b2b8-de7768745300",
+      "id": "55ec1b01-cb02-4f6f-9ed9-5b42e26b3e8a",
       "name": "Update After Rewrite",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
         -160,
-        128
+        -1152
       ]
     },
     {
       "parameters": {
         "jsCode": "// Count words in the content\nconst content = $input.item.json.currentContent;\nconst wordCount = content ? content.trim().split(/\\s+/).length : 0;\n\n// Get original prompt and other data\nconst originalPrompt = $node['Initialize Variables'].json.prompt;\nconst aiScore = $input.item.json.aiScore || 0;\nconst rewriteAttempts = $input.item.json.rewriteAttempts || 0;\n\nreturn {\n  title: $input.item.json.title,\n  content: content,\n  wordCount: wordCount,\n  aiScore: aiScore,\n  originalPrompt: originalPrompt,\n  rewriteAttempts: rewriteAttempts,\n  creationDate: new Date().toISOString()\n};"
       },
-      "id": "9472ba5e-f5a5-417d-875c-ec474d33a45e",
+      "id": "88a84d6c-6111-48fc-8e47-c63695f84592",
       "name": "Prepare Airtable Data",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
         -448,
-        144
+        -1136
       ]
     },
     {
@@ -456,13 +467,13 @@
           }
         }
       },
-      "id": "0bed8462-a0a5-4b49-9be3-7d7fa08539a6",
+      "id": "5a19cfaa-cfd3-447a-9d55-ab5d37ca917c",
       "name": "Success Response",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        64,
-        352
+        112,
+        -928
       ]
     },
     {
@@ -582,9 +593,9 @@
       "typeVersion": 2.1,
       "position": [
         -160,
-        352
+        -928
       ],
-      "id": "568485f4-d3e8-4b4e-aad0-aeabd8dd4d94",
+      "id": "17d3e2d7-4114-4b25-a358-405a29a8ab7a",
       "name": "Save to Airtable",
       "credentials": {
         "airtableTokenApi": {
@@ -609,52 +620,52 @@
           }
         }
       },
-      "id": "6f5750c1-9cd5-43e0-a4cd-eb66080c3783",
+      "id": "80af61cd-7348-4265-9a8a-8cd1dc334e36",
       "name": "Error Response",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
         -2656,
-        768
+        -512
       ]
     },
     {
       "parameters": {
         "errorMessage": "Sapling AI detection service error!"
       },
-      "id": "c423d4c5-332e-4a2b-b482-31436d61bd31",
+      "id": "d106d266-7b3f-481f-baaf-46db9d5c0bae",
       "name": "AI Detection Error",
       "type": "n8n-nodes-base.stopAndError",
       "typeVersion": 1,
       "position": [
         -960,
-        368
+        -912
       ]
     },
     {
       "parameters": {
         "errorMessage": "Content parsing failed - unable to extract article content from OpenAI response. Please check the OpenAI model configuration and JSON output setting."
       },
-      "id": "c8527413-bacb-4ef7-bf9a-9f2397cfdfc5",
+      "id": "c5f369e9-e945-43bc-83f9-d42ca00bda2b",
       "name": "Content Parse Error",
       "type": "n8n-nodes-base.stopAndError",
       "typeVersion": 1,
       "position": [
         -2432,
-        544
+        -736
       ]
     },
     {
       "parameters": {
         "errorMessage": "Airtable Error!"
       },
-      "id": "aae2d936-a550-448e-b46a-5439d27b0923",
+      "id": "3aabd1b3-0230-4ca2-8c90-d4a0885bbef7",
       "name": "Airtable Error",
       "type": "n8n-nodes-base.stopAndError",
       "typeVersion": 1,
       "position": [
         -2656,
-        1216
+        -64
       ]
     },
     {
@@ -692,26 +703,26 @@
         "looseTypeValidation": true,
         "options": {}
       },
-      "id": "f91cd753-8647-4fa5-b3d1-f9a7ad76711d",
+      "id": "98a086b6-1ecb-4089-a128-07ba7703bdb7",
       "name": "Check Content Valid",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
         -2656,
-        544
+        -736
       ]
     },
     {
       "parameters": {
-        "jsCode": "// Prepare Sapling API request data\nconst content = $input.item.json.currentContent;\n\n// Your Sapling API key - replace with your actual key\nconst SAPLING_API_KEY = \"YOUR_SAPLING_API_KEY_HERE\";\n\n// Validate content\nif (!content || typeof content !== 'string' || content.trim().length === 0) {\n    throw new Error('No valid content available for AI detection');\n}\n\n// Clean and prepare the content (limit to 200k characters as per Sapling API)\nlet cleanContent = content\n    .replace(/[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\u007F]/g, '') // Remove control characters\n    .trim();\n\n// Limit content length (Sapling API has 200k character limit)\nif (cleanContent.length > 200000) {\n    cleanContent = cleanContent.substring(0, 200000);\n}\n\n// Prepare the request payload\nconst requestPayload = {\n    key: SAPLING_API_KEY,\n    text: cleanContent,\n    sent_scores: true\n};\n\nconsole.log('Preparing Sapling request for content length:', cleanContent.length);\n\nreturn {\n    // Pass through all existing data\n    ...($input.item.json),\n    // Add new fields for the API request\n    requestPayload: requestPayload,\n    requestPayloadString: JSON.stringify(requestPayload),\n    cleanContent: cleanContent\n};"
+        "jsCode": "// Prepare Sapling API request data\nconst content = $input.item.json.currentContent;\n\n// Your Sapling API key - replace with your actual key\nconst SAPLING_API_KEY = \"CP6OJC4Q7B0CLWYDVZ5PP18KPTOVT83Q\";\n\n// Validate content\nif (!content || typeof content !== 'string' || content.trim().length === 0) {\n    throw new Error('No valid content available for AI detection');\n}\n\n// Clean and prepare the content (limit to 200k characters as per Sapling API)\nlet cleanContent = content\n    .replace(/[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\u007F]/g, '') // Remove control characters\n    .trim();\n\n// Limit content length (Sapling API has 200k character limit)\nif (cleanContent.length > 200000) {\n    cleanContent = cleanContent.substring(0, 200000);\n}\n\n// Prepare the request payload\nconst requestPayload = {\n    key: SAPLING_API_KEY,\n    text: cleanContent,\n    sent_scores: true\n};\n\nconsole.log('Preparing Sapling request for content length:', cleanContent.length);\n\nreturn {\n    // Pass through all existing data\n    ...($input.item.json),\n    // Add new fields for the API request\n    requestPayload: requestPayload,\n    requestPayloadString: JSON.stringify(requestPayload),\n    cleanContent: cleanContent\n};"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
         -1408,
-        240
+        -1040
       ],
-      "id": "9f0dcd4a-5b7e-4692-a1f8-c80224715981",
+      "id": "f4c23851-d87a-4831-8732-06291b188875",
       "name": "Prepare Sapling Request"
     }
   ],
@@ -896,7 +907,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "42cf7354-8d73-411f-9600-72900678a283",
+  "versionId": "a5751360-f722-4c14-80ce-671fd716c6cd",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "78ce5a5377274f9298837c1f5755493b7a72f2a100b80c779f56af39bf59618a"
