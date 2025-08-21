@@ -3,17 +3,17 @@
   "nodes": [
     {
       "parameters": {
+        "authentication": "none",
         "httpMethod": "POST",
+        "options": {},
         "path": "article-generation",
-        "responseMode": "onReceived",
-        "options": {}
+        "responseMode": "onReceived"
       },
       "name": "Webhook Trigger",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
       "position": [240, 300],
-      "webhookId": "article-generation-webhook",
-      "id": "910d9f3c-2e66-4a70-90c6-567d210a5c6d"
+      "webhookId": "article-generation-webhook"
     },
     {
       "parameters": {
@@ -44,7 +44,7 @@
             },
             {
               "name": "tone",
-              "value": "={{ $json.tone || 'professional' }}"
+              "value": "={{ $json.tone || \"professional\" }}"
             },
             {
               "name": "currentArticle",
@@ -55,23 +55,21 @@
               "value": 0
             }
           ]
-        },
-        "options": {}
+        }
       },
       "name": "Set Initial Variables",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3,
-      "position": [460, 300],
-      "id": "d02f359a-f1c6-40a4-b3f0-1ca98862042c"
+      "position": [460, 300]
     },
     {
       "parameters": {
-        "text": "={{ 'You are a professional content writer. Write a ' + $('Set Initial Variables').json['tone'] + ' article about ' + $('Set Initial Variables').json['originalPrompt'] + ' that is approximately ' + $('Set Initial Variables').json['wordCount'] + ' words. Requirements: - Natural, human-like writing style - Proper structure with headings and paragraphs - Engaging and informative content - Avoid repetitive patterns - Use varied sentence structures - Include relevant examples when appropriate' }}",
+        "text": "={{ \"You are a professional content writer. Write a \" + $(\"Set Initial Variables\").json[\"tone\"] + \" article about \" + $(\"Set Initial Variables\").json[\"originalPrompt\"] + \" that is approximately \" + $(\"Set Initial Variables\").json[\"wordCount\"] + \" words. Requirements: - Natural, human-like writing style - Proper structure with headings and paragraphs - Engaging and informative content - Avoid repetitive patterns - Use varied sentence structures - Include relevant examples when appropriate\" }}",
         "resource": "model",
         "operation": "complete",
         "model": "gpt-3.5-turbo",
         "temperature": 0.7,
-        "maxTokens": "={{ Math.round($('Set Initial Variables').json['wordCount'] * 1.3) }}",
+        "maxTokens": "={{ Math.round($(\"Set Initial Variables\").json[\"wordCount\"] * 1.3) }}",
         "topP": 1,
         "options": {}
       },
@@ -80,13 +78,16 @@
       "typeVersion": 3,
       "position": [680, 300],
       "credentials": {
-        "openAiApi": "2nipFUqTLSnWySli"
-      },
-      "id": "1753a39d-f339-4230-a81d-260283e5e433"
+        "openAiApi": {
+          "id": "2nipFUqTLSnWySli",
+          "name": "OpenAI API"
+        }
+      }
     },
     {
       "parameters": {
         "url": "https://api.sapling.ai/api/v1/aidetect",
+        "authentication": "none",
         "requestMethod": "POST",
         "headers": {
           "parameters": [
@@ -100,7 +101,7 @@
         "body": {
           "json": {
             "key": "={{$credentials.SAPLING_API_KEY}}",
-            "text": "={{ $('OpenAI Article Generation').json['choices'][0]['message']['content'] }}"
+            "text": "={{ $(\"OpenAI Article Generation\").json[\"choices\"][0][\"message\"][\"content\"] }}"
           }
         },
         "options": {
@@ -118,9 +119,11 @@
       "typeVersion": 4,
       "position": [900, 300],
       "credentials": {
-        "httpRequest": "CP6OJC4Q7B0CLWYDVZ5PP18KPTOVT83Q"
-      },
-      "id": "a549880f-4fe9-4694-8324-9446e6afd675"
+        "httpRequest": {
+          "id": "N4dAoqYDTDe93xQv",
+          "name": "Sapling API"
+        }
+      }
     },
     {
       "parameters": {
@@ -133,8 +136,8 @@
           "conditions": [
             {
               "id": "condition1",
-              "leftValue": "={{ $('Sapling AI Detection').json['score'] * 100 }}",
-              "rightValue": "={{ $('Set Initial Variables').json['targetAIScore'] }}",
+              "leftValue": "={{ $(\"Sapling AI Detection\").json[\"score\"] * 100 }}",
+              "rightValue": "={{ $(\"Set Initial Variables\").json[\"targetAIScore\"] }}",
               "operator": {
                 "type": "number",
                 "operation": "smaller"
@@ -142,14 +145,12 @@
             }
           ],
           "combinator": "and"
-        },
-        "options": {}
+        }
       },
       "name": "AI Score Evaluation",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [1120, 300],
-      "id": "ee2a8add-5763-4356-863e-86782b535ad1"
+      "position": [1120, 300]
     },
     {
       "parameters": {
@@ -158,7 +159,7 @@
           "number": [
             {
               "name": "attemptCount",
-              "value": "={{ $('Set Initial Variables').json['attemptCount'] + 1 }}"
+              "value": "={{ $(\"Set Initial Variables\").json[\"attemptCount\"] + 1 }}"
             }
           ],
           "string": []
@@ -168,8 +169,7 @@
       "name": "Increment Attempt Counter",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3,
-      "position": [1120, 500],
-      "id": "72b179f4-b248-4501-a331-7bc0e48abe5f"
+      "position": [1120, 500]
     },
     {
       "parameters": {
@@ -183,7 +183,7 @@
             {
               "id": "condition1",
               "leftValue": "={{ $json.attemptCount }}",
-              "rightValue": "={{ $('Set Initial Variables').json['maxAttempts'] }}",
+              "rightValue": "={{ $(\"Set Initial Variables\").json[\"maxAttempts\"] }}",
               "operator": {
                 "type": "number",
                 "operation": "gte"
@@ -191,23 +191,21 @@
             }
           ],
           "combinator": "and"
-        },
-        "options": {}
+        }
       },
       "name": "Check Max Attempts",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [1320, 500],
-      "id": "11ce89d6-d25e-421a-8f02-1eced4d5fd93"
+      "position": [1320, 500]
     },
     {
       "parameters": {
-        "text": "={{ 'Rewrite the following article to make it sound more human and natural. The current AI detection score is ' + ($('Sapling AI Detection').json['score'] * 100) + '%. Focus on: - Adding personal touches and varied sentence structures - Using more conversational language while maintaining ' + $('Set Initial Variables').json['tone'] + ' tone - Including transitional phrases and natural flow - Adding subtle imperfections that humans naturally include - Varying paragraph lengths and structures Original article: ' + $('OpenAI Article Generation').json['choices'][0]['message']['content'] + ' Maintain the same topic, word count (~' + $('Set Initial Variables').json['wordCount'] + ' words), and core information.' }}",
+        "text": "={{ \"Rewrite the following article to make it sound more human and natural. The current AI detection score is \" + ($(\"Sapling AI Detection\").json[\"score\"] * 100) + \"%. Focus on: - Adding personal touches and varied sentence structures - Using more conversational language while maintaining \" + $(\"Set Initial Variables\").json[\"tone\"] + \" tone - Including transitional phrases and natural flow - Adding subtle imperfections that humans naturally include - Varying paragraph lengths and structures Original article: \" + $(\"OpenAI Article Generation\").json[\"choices\"][0][\"message\"][\"content\"] + \" Maintain the same topic, word count (~\" + $(\"Set Initial Variables\").json[\"wordCount\"] + \" words), and core information.\" }}",
         "resource": "model",
         "operation": "complete",
         "model": "gpt-3.5-turbo",
         "temperature": 0.8,
-        "maxTokens": "={{ Math.round($('Set Initial Variables').json['wordCount'] * 1.3) }}",
+        "maxTokens": "={{ Math.round($(\"Set Initial Variables\").json[\"wordCount\"] * 1.3) }}",
         "topP": 1,
         "options": {}
       },
@@ -216,9 +214,11 @@
       "typeVersion": 3,
       "position": [1320, 700],
       "credentials": {
-        "openAiApi": "2nipFUqTLSnWySli"
-      },
-      "id": "fab63c91-2bb8-4f72-94d6-90f821ef5284"
+        "openAiApi": {
+          "id": "2nipFUqTLSnWySli",
+          "name": "OpenAI API"
+        }
+      }
     },
     {
       "parameters": {
@@ -228,8 +228,7 @@
       "name": "Loop Back Node",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 2,
-      "position": [1540, 700],
-      "id": "70cbc24d-87d4-44d4-8760-56a2e398ca8b"
+      "position": [1540, 700]
     },
     {
       "parameters": {
@@ -239,27 +238,27 @@
           "values": [
             {
               "column": "Article Title",
-              "value": "={{ $('Set Initial Variables').json['originalPrompt'] }}"
+              "value": "={{ $(\"Set Initial Variables\").json[\"originalPrompt\"] }}"
             },
             {
               "column": "Content",
-              "value": "={{ $('OpenAI Article Generation').json['choices'][0]['message']['content'] }}"
+              "value": "={{ $(\"OpenAI Article Generation\").json[\"choices\"][0][\"message\"][\"content\"] }}"
             },
             {
               "column": "Word Count",
-              "value": "={{ $('Set Initial Variables').json['wordCount'] }}"
+              "value": "={{ $(\"Set Initial Variables\").json[\"wordCount\"] }}"
             },
             {
               "column": "Tone",
-              "value": "={{ $('Set Initial Variables').json['tone'] }}"
+              "value": "={{ $(\"Set Initial Variables\").json[\"tone\"] }}"
             },
             {
               "column": "AI Detection Score",
-              "value": "={{ ($('Sapling AI Detection').json['score'] * 100) + '%' }}"
+              "value": "={{ ($(\"Sapling AI Detection\").json[\"score\"] * 100) + \"%\" }}"
             },
             {
               "column": "Attempts Used",
-              "value": "={{ $('Increment Attempt Counter').json['attemptCount'] }}"
+              "value": "={{ $(\"Increment Attempt Counter\").json[\"attemptCount\"] }}"
             },
             {
               "column": "Created Date",
@@ -267,7 +266,7 @@
             },
             {
               "column": "Status",
-              "value": "={{ ($('Sapling AI Detection').json['score'] * 100) < 10 ? 'Success' : 'Max Attempts Reached' }}"
+              "value": "={{ ($(\"Sapling AI Detection\").json[\"score\"] * 100) < 10 ? 'Success' : 'Max Attempts Reached' }}"
             }
           ]
         },
@@ -278,9 +277,11 @@
       "typeVersion": 3,
       "position": [1540, 300],
       "credentials": {
-        "airtableApi": "lsSVzmWHf9W8pVYi"
-      },
-      "id": "3fc214ce-0f7e-4653-934e-92fcfdbc2944"
+        "airtableApi": {
+          "id": "lsSVzmWHf9W8pVYi",
+          "name": "Airtable API"
+        }
+      }
     },
     {
       "parameters": {
@@ -288,9 +289,9 @@
           "json": {
             "status": "success",
             "message": "Article generated successfully",
-            "aiScore": "={{ ($('Sapling AI Detection').json['score'] * 100) + '%' }}",
-            "attemptsUsed": "={{ $('Increment Attempt Counter').json['attemptCount'] }}",
-            "wordCount": "={{ $('Set Initial Variables').json['wordCount'] }}"
+            "aiScore": "={{ ($(\"Sapling AI Detection\").json[\"score\"] * 100) + \"%\" }}",
+            "attemptsUsed": "={{ $(\"Increment Attempt Counter\").json[\"attemptCount\"] }}",
+            "wordCount": "={{ $(\"Set Initial Variables\").json[\"wordCount\"] }}"
           }
         },
         "options": {},
@@ -299,8 +300,7 @@
       "name": "Success Response",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [1760, 300],
-      "id": "cc8bc83d-2ff0-465a-bdeb-8b6f2e1d7bd2"
+      "position": [1760, 300]
     },
     {
       "parameters": {
@@ -308,9 +308,9 @@
           "json": {
             "status": "partial_success",
             "message": "Article generated but AI detection score above target",
-            "aiScore": "={{ ($('Sapling AI Detection').json['score'] * 100) + '%' }}",
-            "attemptsUsed": "={{ $('Set Initial Variables').json['maxAttempts'] }}",
-            "wordCount": "={{ $('Set Initial Variables').json['wordCount'] }}"
+            "aiScore": "={{ ($(\"Sapling AI Detection\").json[\"score\"] * 100) + \"%\" }}",
+            "attemptsUsed": "={{ $(\"Set Initial Variables\").json[\"maxAttempts\"] }}",
+            "wordCount": "={{ $(\"Set Initial Variables\").json[\"wordCount\"] }}"
           }
         },
         "options": {},
@@ -319,8 +319,7 @@
       "name": "Max Attempts Response",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [1760, 500],
-      "id": "adc63252-6b80-4074-a929-4ee304bc473b"
+      "position": [1760, 500]
     }
   ],
   "connections": {
@@ -469,15 +468,10 @@
     }
   },
   "pinData": {},
+  "versionId": "1",
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "70c3805e-5047-4716-8a82-0685691c25bd",
-  "id": "vxjT1A47U3pQPQ4L",
-  "active": false,
-  "tags": [],
-  "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "78ce5a5377274f9298837c1f5755493b7a72f2a100b80c779f56af39bf59618a"
-  }
+  "staticData": null,
+  "tags": []
 }
