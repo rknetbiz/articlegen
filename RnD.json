@@ -1,0 +1,739 @@
+{
+  "name": "R&D",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "data_flow_test",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        -184
+      ],
+      "id": "29ec8b9b-823f-4b8d-abd2-f59d7bf0375b",
+      "name": "Webhook",
+      "webhookId": "f1277555-c023-4a8d-8e28-ea21f6802087"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fd1f9a2e-3170-4c67-8470-0ac0cebb3363",
+              "name": "originalPrompt",
+              "value": "={{ $json.prompt }}",
+              "type": "string"
+            },
+            {
+              "id": "da7c5bae-60ce-48ea-bea0-2f3ba284fbf5",
+              "name": "tone",
+              "value": "={{ $json.tone || \"professional\" }}",
+              "type": "string"
+            },
+            {
+              "id": "cac8cb22-5370-4b69-8beb-71e4d79f27a4",
+              "name": "wordCount",
+              "value": "={{ $json.wordCount }}",
+              "type": "number"
+            },
+            {
+              "id": "3d1ba5ef-f26b-406a-9064-4d49f776a3b5",
+              "name": "attemptCount",
+              "value": 0,
+              "type": "number"
+            },
+            {
+              "id": "8e0ffd58-a939-400b-a067-7f5068d0dd15",
+              "name": "maxAttempts",
+              "value": 5,
+              "type": "number"
+            },
+            {
+              "id": "7ae1c6b1-c0ef-4882-85b9-268ab6947a53",
+              "name": "targetAIScore",
+              "value": 10,
+              "type": "number"
+            },
+            {
+              "id": "16b06bd1-183a-4377-91c7-43e4f3669628",
+              "name": "currentArticle",
+              "value": "\"\"",
+              "type": "string"
+            },
+            {
+              "id": "6b8f16c1-5fa0-438f-b310-458ff37226cf",
+              "name": "finalAIScore",
+              "value": 0,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        -184
+      ],
+      "id": "d08b51e6-0fa1-4a34-ab1c-47dd06114410",
+      "name": "Set"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "86eb4267-b5b7-4469-a454-f7cdb4393481",
+              "leftValue": "={{ $json.current.aiScore }}",
+              "rightValue": "={{ $json.workflow.targetAIScore }}",
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2144,
+        -256
+      ],
+      "id": "eace5bfa-6d34-4b71-8dc5-30fe9108698c",
+      "name": "AI Score Evaluation"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.sapling.ai/api/v1/aidetect",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"key\": \"SAPLING_API_KEY\",\n  \"text\": \"{{ $json.text }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1696,
+        -256
+      ],
+      "id": "5ae61caa-db4b-4412-80bd-7dee72893df7",
+      "name": "Sapling_AI_Detection"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4-turbo",
+          "mode": "list",
+          "cachedResultName": "GPT-4-TURBO"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a professional content writer. Write a {{ $json.workflow.tone }} article about {{ $json.workflow.originalPrompt }} that is approximately {{ $json.workflow.wordCount }} words. \n\nRequirements:\n- Natural, human-like writing style\n- Proper structure with headings and paragraphs\n- Engaging and informative content\n- Avoid repetitive patterns\n- Use varied sentence structures\n- Include relevant examples when appropriate"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {
+          "maxTokens": "={{ Math.round($json.workflow.wordCount * 1.3) }}",
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        672,
+        -184
+      ],
+      "id": "2439c077-8045-4e42-b881-a932c8c525f8",
+      "name": "Article_Write",
+      "credentials": {
+        "openAiApi": {
+          "id": "2nipFUqTLSnWySli",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "94e40fd6-8a0e-4fce-94be-6908f2255498",
+              "name": "attemptCount",
+              "value": "={{ $json.workflow.attemptCount + 1 }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2368,
+        -160
+      ],
+      "id": "6efceedd-c8de-48b4-aca8-be473b5103db",
+      "name": "Attempt_Counter"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appVHyWpZjm1GLoKz",
+          "mode": "list",
+          "cachedResultName": "ArticleStore",
+          "cachedResultUrl": "https://airtable.com/appVHyWpZjm1GLoKz"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblkudiRSoJwf4Q4F",
+          "mode": "list",
+          "cachedResultName": "Articles",
+          "cachedResultUrl": "https://airtable.com/appVHyWpZjm1GLoKz/tblkudiRSoJwf4Q4F"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Article Title": "{{ $(\"Set\").json[\"originalPrompt\"] }}",
+            "Content": "{{ $(\"Article_write\").json[\"choices\"][0][\"message\"][\"content\"] }}",
+            "Word Count": "={{ $(\"Set\").json[\"wordCount\"] }}",
+            "Tone": "{{ $(\"Set\").json[\"tone\"] }}",
+            "AI Detection Score": "{{ ($(\"AI_Score_Evaluation\").json[\"score\"] * 100) + \"%\" }}",
+            "Attempts Used": "={{ $(\"Attempt_Counter\").json[\"attemptCount\"] }}",
+            "Created Date": "={{ new Date().toISOString() }}",
+            "Status": "{{ ($(\"Sapling_AI_Detection\").json[\"score\"] * 100) < 10 ? \"Success\" : \"Max Attempts Reached\" }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Article Title",
+              "displayName": "Article Title",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Content",
+              "displayName": "Content",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Word Count",
+              "displayName": "Word Count",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Tone",
+              "displayName": "Tone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "AI Detection Score",
+              "displayName": "AI Detection Score",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Attempts Used",
+              "displayName": "Attempts Used",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created Date",
+              "displayName": "Created Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2368,
+        -352
+      ],
+      "id": "38dfbb89-eee3-40eb-a67b-5db9d2513f82",
+      "name": "Airtable",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "lsSVzmWHf9W8pVYi",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"success\",\n  \"message\": \"Article generated successfully\",\n  \"aiScore\": \"{{ $json.current.aiScore }}%\",\n  \"attemptsUsed\": \"{{ $json.workflow.attemptCount }}\",\n  \"wordCount\": \"{{ $json.workflow.wordCount }}\",\n  \"articleId\": \"{{ $json.generation.articles.length }}\"\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        2592,
+        -352
+      ],
+      "id": "95fc84fc-5bbb-47f5-826e-f7b3bf40f836",
+      "name": "Success_Response"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"partial_success\", \n  \"message\": \"Maximum attempts reached\",\n  \"bestScore\": \"{{ Math.min(...$json.generation.articles.map(a => a.score)) }}%\",\n  \"attemptsUsed\": \"{{ $json.workflow.maxAttempts }}\",\n  \"wordCount\": \"{{ $json.workflow.wordCount }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        3104,
+        -256
+      ],
+      "id": "2224d26a-6a54-4c41-aa20-516c3102f862",
+      "name": "Max_Tries_Exceeded"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3727ff01-eacd-4737-a922-1b25051aa771",
+              "leftValue": "={{ $json.attemptCount }}",
+              "rightValue": "={{ $(\"Set\").json[\"maxAttempts\"] }}",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2816,
+        -160
+      ],
+      "id": "83e60510-1d36-4294-9aec-6f6a8ef7e434",
+      "name": "Max_Attempt_Checker"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4-turbo",
+          "mode": "list",
+          "cachedResultName": "GPT-4-TURBO"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Rewrite the following article to make it sound more human and natural. The current AI detection score is {{ $json.generation.articles.score * 100 }}%. \n\nFocus on:\n- Adding personal touches and varied sentence structures\n- Using more conversational language while maintaining {{ $json.workflow.tone }} tone\n- Including transitional phrases and natural flow\n- Adding subtle imperfections that humans naturally include\n- Varying paragraph lengths and structures\n\nOriginal article: {{ $json.current.articleContent }}\n\nMaintain the same topic, word count (~{{ $json.workflow.wordCount }} words), and core information."
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.8
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        3040,
+        -64
+      ],
+      "id": "c20257ba-840f-4a8b-bc45-a068d14d0ee3",
+      "name": "Article_Rewrite",
+      "credentials": {
+        "openAiApi": {
+          "id": "2nipFUqTLSnWySli",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Strategic Data Structure for Article Generation Workflow\n// Place this function node IMMEDIATELY after your Set node\n\nreturn [\n  {\n    json: {\n      // ===== CORE WORKFLOW SETTINGS (from Set node) =====\n      workflow: {\n        originalPrompt: $json.originalPrompt || \"\",\n        tone: $json.tone || \"professional\",\n        wordCount: $json.wordCount || 1500,\n        targetAIScore: $json.targetAIScore || 10,\n        maxAttempts: $json.maxAttempts || 5,\n        attemptCount: $json.attemptCount || 0\n      },\n      \n      // ===== PROCESSING RESULTS (will be populated later) =====\n      generation: {\n        currentAttempt: 1,\n        articles: [], // Will store each generated article with scores\n        bestArticle: null, // Will store the article with lowest AI score\n        finalArticle: null // Will store the article to be saved\n      },\n      \n      // ===== CURRENT PROCESSING STATE =====\n      current: {\n        articleContent: \"\", // Current article being processed\n        aiScore: 0, // Current AI detection score\n        requiresRewrite: false // Whether current article needs rewriting\n      },\n      \n      // ===== STATUS TRACKING =====\n      status: {\n        isComplete: false,\n        success: false,\n        reason: \"Processing started\"\n      },\n      \n      // ===== TIMESTAMPS =====\n      timestamps: {\n        startTime: new Date().toISOString(),\n        lastUpdate: new Date().toISOString()\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        -184
+      ],
+      "id": "ab20c27f-b40c-4fac-86f1-2fa372807762",
+      "name": "Master Data"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      ...$json,\n      current: {\n        ...$json.current,\n        articleContent: $input.first().json.choices[0].message.content,\n        articleSource: \"initial\" // Add identifier\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1024,
+        -184
+      ],
+      "id": "99da7b5a-a19d-4394-9759-f0ef9e2a32ff",
+      "name": "Append_Article_Values"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function Node: Restore Data After Sapling Detection\n// Place after Sapling_AI_Detection node\n\n// Get the Sapling API response\nconst saplingResult = $input.first().json;\n\n// Get our preserved original data\nconst originalData = $input.first().json.originalData;\n\n// Calculate the AI score percentage\nconst aiScore = (saplingResult.score * 100) || 0;\n\n// Update the data structure with the detection results\nreturn [\n  {\n    json: {\n      ...originalData, // Restore the complete original data structure\n      current: {\n        ...originalData.current,\n        aiScore: aiScore,\n        requiresRewrite: aiScore >= originalData.workflow.targetAIScore\n      },\n      timestamps: {\n        ...originalData.timestamps,\n        lastDetection: new Date().toISOString()\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1920,
+        -256
+      ],
+      "id": "1a63e815-a38e-46c0-a544-ad9a5cc8cc07",
+      "name": "Append_AI_Score"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Update attempt count in the master structure\nreturn [\n  {\n    json: {\n      ...$json, // Keep all existing data\n      workflow: {\n        ...$json.workflow,\n        attemptCount: $input.first().json.attemptCount\n      },\n      generation: {\n        ...$json.generation,\n        currentAttempt: $input.first().json.attemptCount + 1\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2592,
+        -160
+      ],
+      "id": "b2aa36da-e88f-492d-b831-c3585edc7e21",
+      "name": "Append_Attempt_Count"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      ...$json,\n      current: {\n        ...$json.current,\n        articleContent: $input.first().json.choices[0].message.content,\n        articleSource: \"rewrite\" // Add identifier\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3392,
+        8
+      ],
+      "id": "defe74a3-c4f6-465d-9abe-bca8ec4ef114",
+      "name": "Append_Rewritten_Article"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1248,
+        -184
+      ],
+      "id": "e8eb0837-7179-4d4e-9c27-8c83e768ce68",
+      "name": "Merge_For_Sapling"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function Node: Prepare Data for Sapling AI Detection\n// Place between Merge node and Sapling_AI_Detection node\n\n// Extract the data from the Merge node output\n// The Merge node in \"Append\" mode outputs an array of inputs\nconst mergedData = $input.all();\n\n// Since we're merging two possible paths, we need to determine which one sent data\n// and extract the article content from that path\nlet articleContent = \"\";\nlet fullDataStructure = {};\n\nif (mergedData && mergedData.length > 0) {\n  // The Merge node outputs an array, so we take the first element\n  // which contains our complete data structure from either path\n  fullDataStructure = mergedData[0].json;\n  \n  // Extract the article content from the current data\n  articleContent = fullDataStructure.current.articleContent || \"\";\n}\n\n// Prepare the output for the Sapling_AI_Detection node\n// We need to send both the article content for detection AND preserve the full data structure\nreturn [\n  {\n    json: {\n      // This is what the Sapling API expects - the text to analyze\n      text: articleContent,\n      \n      // Preserve the complete data structure for later restoration\n      originalData: fullDataStructure,\n      \n      // Add timestamp for tracking\n      processingTimestamp: new Date().toISOString(),\n      \n      // Add metadata about which path this came from\n      source: fullDataStructure.current.articleSource || \"unknown\"\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1472,
+        -256
+      ],
+      "id": "73953417-6b9e-4847-995f-3d314fbd1795",
+      "name": "Article_Source_Identifier"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Set",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set": {
+      "main": [
+        [
+          {
+            "node": "Master Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Score Evaluation": {
+      "main": [
+        [
+          {
+            "node": "Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Attempt_Counter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sapling_AI_Detection": {
+      "main": [
+        [
+          {
+            "node": "Append_AI_Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Article_Write": {
+      "main": [
+        [
+          {
+            "node": "Append_Article_Values",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attempt_Counter": {
+      "main": [
+        [
+          {
+            "node": "Append_Attempt_Count",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable": {
+      "main": [
+        [
+          {
+            "node": "Success_Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Max_Attempt_Checker": {
+      "main": [
+        [
+          {
+            "node": "Max_Tries_Exceeded",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Article_Rewrite",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Article_Rewrite": {
+      "main": [
+        [
+          {
+            "node": "Append_Rewritten_Article",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Master Data": {
+      "main": [
+        [
+          {
+            "node": "Article_Write",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append_Article_Values": {
+      "main": [
+        [
+          {
+            "node": "Merge_For_Sapling",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append_AI_Score": {
+      "main": [
+        [
+          {
+            "node": "AI Score Evaluation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append_Attempt_Count": {
+      "main": [
+        [
+          {
+            "node": "Max_Attempt_Checker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append_Rewritten_Article": {
+      "main": [
+        [
+          {
+            "node": "Merge_For_Sapling",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge_For_Sapling": {
+      "main": [
+        [
+          {
+            "node": "Article_Source_Identifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Article_Source_Identifier": {
+      "main": [
+        [
+          {
+            "node": "Sapling_AI_Detection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b1ad0961-cd0e-40af-ba38-fbcb9fba0005",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "78ce5a5377274f9298837c1f5755493b7a72f2a100b80c779f56af39bf59618a"
+  },
+  "id": "ddCHfKIPWxNMVPvh",
+  "tags": []
+}
